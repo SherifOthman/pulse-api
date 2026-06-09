@@ -28,6 +28,7 @@ public class GetDoctorsHandler(AppDbContext db)
         {
             b.Id,
             b.Name,
+            b.ProfileImageUrl,
             SpecializationName = b.Doctor!.Specialization.Name,
             GovernorateName = b.City.Governorate.Name,
             AvgRating = b.Testimonials
@@ -57,6 +58,7 @@ public class GetDoctorsHandler(AppDbContext db)
         var items = raw.Items.Select(r => new DoctorListResponse(
             r.Id,
             r.Name,
+            r.ProfileImageUrl,
             r.SpecializationName,
             r.GovernorateName,
             Math.Round(r.AvgRating, 1),
