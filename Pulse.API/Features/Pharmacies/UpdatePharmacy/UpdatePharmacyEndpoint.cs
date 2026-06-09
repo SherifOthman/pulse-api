@@ -6,7 +6,7 @@ public class UpdatePharmacyEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("/pharmacies/{id:guid}", async (Guid id, UpdatePharmacyCommand command, IMediator mediator) =>
+        app.MapPut("/dashboard/pharmacies/{id:guid}", async (Guid id, UpdatePharmacyCommand command, IMediator mediator) =>
         {
             try
             {

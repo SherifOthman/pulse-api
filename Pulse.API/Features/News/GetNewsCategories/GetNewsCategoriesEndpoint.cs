@@ -6,7 +6,7 @@ public class GetNewsCategoriesEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/news/categories", async (IMediator mediator) =>
+        app.MapGet("/dashboard/news/categories", async (IMediator mediator) =>
         {
             var categories = await mediator.Send(new GetNewsCategoriesQuery());
             return Results.Ok(categories);

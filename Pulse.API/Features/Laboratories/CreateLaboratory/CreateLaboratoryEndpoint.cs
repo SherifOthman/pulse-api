@@ -6,7 +6,7 @@ public class CreateLaboratoryEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/labs", async (CreateLaboratoryCommand command, IMediator mediator) =>
+        app.MapPost("/dashboard/labs", async (CreateLaboratoryCommand command, IMediator mediator) =>
         {
             try
             {

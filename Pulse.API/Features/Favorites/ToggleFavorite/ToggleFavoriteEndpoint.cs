@@ -7,7 +7,7 @@ public class ToggleFavoriteEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/favorites/{businessId:guid}/toggle", async (Guid businessId, IMediator mediator) =>
+        app.MapPost("/dashboard/favorites/{businessId:guid}/toggle", async (Guid businessId, IMediator mediator) =>
         {
             await mediator.Send(new ToggleFavoriteCommand(businessId));
             return Results.NoContent();

@@ -6,7 +6,7 @@ public class DeleteLaboratoryEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapDelete("/labs/{id:guid}", async (Guid id, IMediator mediator) =>
+        app.MapDelete("/dashboard/labs/{id:guid}", async (Guid id, IMediator mediator) =>
         {
             await mediator.Send(new DeleteLaboratoryCommand(id));
             return Results.NoContent();

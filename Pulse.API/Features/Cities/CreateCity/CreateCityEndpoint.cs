@@ -6,7 +6,7 @@ public class CreateCityEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/cities", async (CreateCityCommand command, IMediator mediator) =>
+        app.MapPost("/dashboard/cities", async (CreateCityCommand command, IMediator mediator) =>
         {
             var result = await mediator.Send(command);
             return Results.Ok(result);

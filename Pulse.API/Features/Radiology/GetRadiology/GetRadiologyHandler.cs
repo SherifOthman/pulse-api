@@ -1,6 +1,5 @@
 using Pulse.API.Domain.Enums;
 using Pulse.API.Features.Shared;
-using Pulse.API.Infrastructure;
 using Pulse.API.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +11,6 @@ public class GetRadiologyHandler(AppDbContext db)
 {
     public async Task<PaginatedResponse<RadiologyListResponse>> Handle(GetRadiologyQuery request, CancellationToken ct)
     {
-        var today = DateTime.Now.DayOfWeek;
-        var now = TimeOnly.FromDateTime(DateTime.Now);
         var bq = request.BusinessQuery;
 
         var query = db.Businesses
@@ -25,23 +22,11 @@ public class GetRadiologyHandler(AppDbContext db)
         {
             b.Id,
             b.Name,
-            b.ProfileImageUrl,
             GovernorateName = b.City.Governorate.Name,
             AvgRating = b.Testimonials
                 .Select(t => (double)t.Rating)
                 .DefaultIfEmpty()
                 .Average(),
-            TotalRatings = b.Testimonials.Count,
-            NextWorkingDay = b.WorkingDays
-                .Select(w => new
-                {
-                    w.Day,
-                    w.StartTime,
-                    w.EndTime,
-                    DaysUntil = w.Day >= today ? w.Day - today : 7 - (int)today + (int)w.Day
-                })
-                .OrderBy(w => w.DaysUntil)
-                .FirstOrDefault(),
             CreatedBy = b.CreatedByUser != null ? b.CreatedByUser.FullName : null,
         });
 
@@ -58,27 +43,13 @@ public class GetRadiologyHandler(AppDbContext db)
 
         var raw = await projected.ToPaginatedAsync(bq.Page, bq.PageSize, ct);
 
-        var items = raw.Items.Select(r =>
-        {
-            var isOpen = r.NextWorkingDay != null
-                && r.NextWorkingDay.Day == today
-                && r.NextWorkingDay.StartTime <= now
-                && r.NextWorkingDay.EndTime >= now;
-
-            return new RadiologyListResponse(
-                r.Id,
-                r.Name,
-                r.ProfileImageUrl,
-                r.GovernorateName,
-                Math.Round(r.AvgRating, 1),
-                r.TotalRatings,
-                r.NextWorkingDay != null ? (int)r.NextWorkingDay.Day : 0,
-                r.NextWorkingDay?.StartTime.ToString("HH:mm"),
-                r.NextWorkingDay?.EndTime.ToString("HH:mm"),
-                isOpen,
-                r.CreatedBy
-            );
-        }).ToList();
+        var items = raw.Items.Select(r => new RadiologyListResponse(
+            r.Id,
+            r.Name,
+            r.GovernorateName,
+            Math.Round(r.AvgRating, 1),
+            r.CreatedBy
+        )).ToList();
 
         return new PaginatedResponse<RadiologyListResponse>(
             items, raw.Page, raw.PageSize, raw.TotalCount, raw.HasMore);

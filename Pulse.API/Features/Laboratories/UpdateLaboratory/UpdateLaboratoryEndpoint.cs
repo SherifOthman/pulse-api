@@ -6,7 +6,7 @@ public class UpdateLaboratoryEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("/labs/{id:guid}", async (Guid id, UpdateLaboratoryCommand command, IMediator mediator) =>
+        app.MapPut("/dashboard/labs/{id:guid}", async (Guid id, UpdateLaboratoryCommand command, IMediator mediator) =>
         {
             try
             {

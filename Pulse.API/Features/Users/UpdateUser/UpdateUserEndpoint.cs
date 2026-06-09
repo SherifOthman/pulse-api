@@ -6,7 +6,7 @@ public class UpdateUserEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("/admin/users/{id:guid}", async (Guid id, UpdateUserCommand command, IMediator mediator) =>
+        app.MapPut("/dashboard/admin/users/{id:guid}", async (Guid id, UpdateUserCommand command, IMediator mediator) =>
         {
             var result = await mediator.Send(command with { Id = id });
             return Results.Ok(result);

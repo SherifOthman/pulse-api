@@ -7,7 +7,7 @@ public class UpdateMeEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("/users/me", async (HttpContext context, IMediator mediator, ICurrentUser currentUser) =>
+        app.MapPut("/dashboard/users/me", async (HttpContext context, IMediator mediator, ICurrentUser currentUser) =>
         {
             var form = await context.Request.ReadFormAsync();
             var fullName = form["fullName"].FirstOrDefault();

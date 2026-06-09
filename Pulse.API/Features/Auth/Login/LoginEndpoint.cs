@@ -7,7 +7,7 @@ public class LoginEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/auth/login", async (LoginCommand command, HttpContext context, IMediator mediator) =>
+        app.MapPost("/dashboard/auth/login", async (LoginCommand command, HttpContext context, IMediator mediator) =>
         {
             var ip = context.Connection.RemoteIpAddress?.ToString();
 
@@ -18,13 +18,13 @@ public class LoginEndpoint : IEndpoint
                 context.Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
                 {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.Lax,
-                    Secure = false,
+                    SameSite = SameSiteMode.None,
+                    Secure = true,
                     Path = "/",
                     Expires = DateTime.UtcNow.AddDays(7)
                 });
 
-                return Results.Ok(new { result.AccessToken });
+                return Results.Ok(new { result.AccessToken, result.RefreshToken });
             }
             catch (UnauthorizedAccessException)
             {

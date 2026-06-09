@@ -6,7 +6,7 @@ public class DeleteCityEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapDelete("/cities/{id:guid}", async (Guid id, IMediator mediator) =>
+        app.MapDelete("/dashboard/cities/{id:guid}", async (Guid id, IMediator mediator) =>
         {
             await mediator.Send(new DeleteCityCommand(id));
             return Results.NoContent();

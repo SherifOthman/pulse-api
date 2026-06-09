@@ -6,7 +6,7 @@ public class UpdateRadiologyEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("/radiology/{id:guid}", async (Guid id, UpdateRadiologyCommand command, IMediator mediator) =>
+        app.MapPut("/dashboard/radiology/{id:guid}", async (Guid id, UpdateRadiologyCommand command, IMediator mediator) =>
         {
             try
             {

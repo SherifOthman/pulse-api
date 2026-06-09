@@ -6,7 +6,7 @@ public class ListUsersEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/admin/users", async (IMediator mediator) =>
+        app.MapGet("/dashboard/admin/users", async (IMediator mediator) =>
         {
             var result = await mediator.Send(new ListUsersQuery());
             return Results.Ok(result);

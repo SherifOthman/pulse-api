@@ -6,7 +6,7 @@ public class DeletePharmacyEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapDelete("/pharmacies/{id:guid}", async (Guid id, IMediator mediator) =>
+        app.MapDelete("/dashboard/pharmacies/{id:guid}", async (Guid id, IMediator mediator) =>
         {
             try
             {

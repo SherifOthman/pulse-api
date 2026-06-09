@@ -6,7 +6,7 @@ public class GetReviewsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/businesses/{id:guid}/reviews", async (
+        app.MapGet("/dashboard/businesses/{id:guid}/reviews", async (
             Guid id,
             IMediator mediator,
             int page = 1,

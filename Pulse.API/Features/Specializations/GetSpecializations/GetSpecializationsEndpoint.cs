@@ -6,7 +6,7 @@ public class GetSpecializationsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/specializations", async (IMediator mediator) =>
+        app.MapGet("/dashboard/specializations", async (IMediator mediator) =>
         {
             var result = await mediator.Send(new GetSpecializationsQuery());
             return Results.Ok(result);

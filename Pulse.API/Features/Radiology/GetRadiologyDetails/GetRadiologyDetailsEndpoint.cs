@@ -7,7 +7,7 @@ public class GetRadiologyDetailsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/radiology/{id:guid}", async (Guid id, IMediator mediator) =>
+        app.MapGet("/dashboard/radiology/{id:guid}", async (Guid id, IMediator mediator) =>
         {
             var result = await mediator.Send(new GetRadiologyDetailsQuery(id));
             return result is null ? Results.NotFound() : Results.Ok(result);

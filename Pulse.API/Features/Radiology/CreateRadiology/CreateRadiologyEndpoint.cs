@@ -6,7 +6,7 @@ public class CreateRadiologyEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/radiology", async (CreateRadiologyCommand command, IMediator mediator) =>
+        app.MapPost("/dashboard/radiology", async (CreateRadiologyCommand command, IMediator mediator) =>
         {
             try
             {

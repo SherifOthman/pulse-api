@@ -6,7 +6,7 @@ public class CreatePharmacyEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/pharmacies", async (CreatePharmacyCommand command, IMediator mediator) =>
+        app.MapPost("/dashboard/pharmacies", async (CreatePharmacyCommand command, IMediator mediator) =>
         {
             try
             {

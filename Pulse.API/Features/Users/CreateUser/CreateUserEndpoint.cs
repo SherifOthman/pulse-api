@@ -6,7 +6,7 @@ public class CreateUserEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/admin/users", async (CreateUserCommand command, IMediator mediator) =>
+        app.MapPost("/dashboard/admin/users", async (CreateUserCommand command, IMediator mediator) =>
         {
             var result = await mediator.Send(command);
             return Results.Ok(result);

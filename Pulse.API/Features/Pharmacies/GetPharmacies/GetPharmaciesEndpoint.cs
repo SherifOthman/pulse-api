@@ -7,7 +7,7 @@ public class GetPharmaciesEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/pharmacies", async (IMediator mediator,
+        app.MapGet("/dashboard/pharmacies", async (IMediator mediator,
             Guid? governorateId,
             Guid? cityId,
             string? name,

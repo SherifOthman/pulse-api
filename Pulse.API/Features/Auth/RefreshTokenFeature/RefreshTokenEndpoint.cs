@@ -7,7 +7,7 @@ namespace Pulse.API.Features.Auth.RefreshTokenFeature
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("/auth/refresh", async (HttpContext context, IMediator mediator) =>
+            app.MapPost("/dashboard/auth/refresh", async (HttpContext context, IMediator mediator) =>
             {
                 var ip = context.Connection.RemoteIpAddress?.ToString();
 
@@ -22,13 +22,13 @@ namespace Pulse.API.Features.Auth.RefreshTokenFeature
                     context.Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
                     {
                         HttpOnly = true,
-                        SameSite = SameSiteMode.Lax,
-                        Secure = false,
+                        SameSite = SameSiteMode.None,
+                        Secure = true,
                         Path = "/",
                         Expires = DateTime.UtcNow.AddDays(7)
                     });
 
-                    return Results.Ok(new { result.AccessToken });
+                    return Results.Ok(new { result.AccessToken, result.RefreshToken });
                 }
                 catch
                 {

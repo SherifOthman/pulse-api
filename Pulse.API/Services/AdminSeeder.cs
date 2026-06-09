@@ -27,6 +27,7 @@ public static class AdminSeeder
                     throw new Exception($"Failed to create {roleName} role: {errors}");
                 }
             }
+          
         }
 
         // 3. Ensure the admin user exists

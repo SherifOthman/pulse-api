@@ -7,7 +7,7 @@ public class ChangePasswordEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/users/me/change-password", async (ChangePasswordRequest request, IMediator mediator, ICurrentUser currentUser) =>
+        app.MapPost("/dashboard/users/me/change-password", async (ChangePasswordRequest request, IMediator mediator, ICurrentUser currentUser) =>
         {
             try
             {

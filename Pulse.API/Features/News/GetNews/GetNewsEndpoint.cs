@@ -6,7 +6,7 @@ public class GetNewsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/news", async (IMediator mediator,
+        app.MapGet("/dashboard/news", async (IMediator mediator,
             int? page, int? pageSize, string? category, string? search) =>
         {
             var result = await mediator.Send(new GetNewsQuery(

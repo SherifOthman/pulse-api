@@ -7,7 +7,7 @@ public class GetMeEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/users/me", async (IMediator mediator, ICurrentUser currentUser) =>
+        app.MapGet("/dashboard/users/me", async (IMediator mediator, ICurrentUser currentUser) =>
         {
             var result = await mediator.Send(new GetMeQuery(currentUser.Id.ToString()));
             return Results.Ok(result);

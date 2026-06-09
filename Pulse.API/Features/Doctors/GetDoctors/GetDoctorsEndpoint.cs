@@ -8,7 +8,7 @@ public class GetDoctorsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/doctors", async (IMediator mediator,
+        app.MapGet("/dashboard/doctors", async (IMediator mediator,
             Guid? governorateId,
             Guid? cityId,
             string? name,

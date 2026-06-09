@@ -7,7 +7,7 @@ public class GetPharmacyDetailsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/pharmacies/{id:guid}", async (Guid id, IMediator mediator) =>
+        app.MapGet("/dashboard/pharmacies/{id:guid}", async (Guid id, IMediator mediator) =>
         {
             var result = await mediator.Send(new GetPharmacyDetailsQuery(id));
             return result is null ? Results.NotFound() : Results.Ok(result);

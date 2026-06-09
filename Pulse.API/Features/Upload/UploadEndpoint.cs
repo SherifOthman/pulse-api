@@ -6,7 +6,7 @@ public class UploadEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/upload", async (IFormFile file, IMediator mediator) =>
+        app.MapPost("/dashboard/upload", async (IFormFile file, IMediator mediator) =>
         {
             if (file is null || file.Length == 0)
                 return Results.BadRequest(new { message = "No file provided" });
