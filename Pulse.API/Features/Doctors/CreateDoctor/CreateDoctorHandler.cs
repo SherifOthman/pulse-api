@@ -48,6 +48,21 @@ public class CreateDoctorHandler(AppDbContext db, ICurrentUser currentUser)
         };
 
         db.Set<Doctor>().Add(doctor);
+
+        if (request.WorkingDays is not null)
+        {
+            foreach (var wd in request.WorkingDays)
+            {
+                db.Set<WorkingDay>().Add(new WorkingDay
+                {
+                    BusinessId = business.Id,
+                    Day = (System.DayOfWeek)wd.Day,
+                    StartTime = TimeOnly.Parse(wd.StartTime),
+                    EndTime = TimeOnly.Parse(wd.EndTime),
+                });
+            }
+        }
+
         await db.SaveChangesAsync(ct);
 
         return new CreateDoctorResponse(business.Id, business.Name);

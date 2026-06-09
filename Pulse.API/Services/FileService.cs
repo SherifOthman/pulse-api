@@ -18,7 +18,7 @@ public class FileService(IWebHostEnvironment env) : IFileService
     {
         var dir = Path.Combine(WebRoot, subDir);
         Directory.CreateDirectory(dir);
-        var fileName = $"{Guid.CreateVersion7()}_{file.FileName}";
+        var fileName = $"{Guid.NewGuid()}_{file.FileName}";
         var path = Path.Combine(dir, fileName);
         await using var stream = new FileStream(path, FileMode.Create);
         await file.CopyToAsync(stream);

@@ -57,6 +57,23 @@ public class UpdateDoctorHandler(AppDbContext db)
                 business.Doctor.Gender = request.Gender.Value;
         }
 
+        if (request.WorkingDays is not null)
+        {
+            var existing = await db.Set<WorkingDay>().Where(w => w.BusinessId == request.Id).ToListAsync(ct);
+            db.Set<WorkingDay>().RemoveRange(existing);
+
+            foreach (var wd in request.WorkingDays)
+            {
+                db.Set<WorkingDay>().Add(new WorkingDay
+                {
+                    BusinessId = request.Id,
+                    Day = (System.DayOfWeek)wd.Day,
+                    StartTime = TimeOnly.Parse(wd.StartTime),
+                    EndTime = TimeOnly.Parse(wd.EndTime),
+                });
+            }
+        }
+
         await db.SaveChangesAsync(ct);
         return new UpdateDoctorResponse(business.Id, business.Name);
     }

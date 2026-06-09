@@ -1,5 +1,6 @@
 using MediatR;
 using Pulse.API.Domain.Enums;
+using Pulse.API.Features.Shared;
 
 namespace Pulse.API.Features.Doctors.UpdateDoctor;
 
@@ -13,5 +14,6 @@ public record UpdateDoctorCommand(
     string? CoverImageUrl,
     Guid? SpecializationId,
     decimal? VisitPrice,
-    Gender? Gender
+    Gender? Gender,
+    List<WorkingDayDto>? WorkingDays
 ) : IRequest<UpdateDoctorResponse>;
