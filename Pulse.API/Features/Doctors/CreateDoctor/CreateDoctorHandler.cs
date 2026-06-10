@@ -19,6 +19,10 @@ public class CreateDoctorHandler(AppDbContext db, ICurrentUser currentUser)
         if (!await db.Set<City>().AnyAsync(c => c.Id == request.CityId, ct))
             throw new NotFoundException("City not found");
 
+        if (request.SpecializationId.HasValue
+            && !await db.Set<Specialization>().AnyAsync(s => s.Id == request.SpecializationId.Value, ct))
+            throw new NotFoundException("Specialization not found");
+
         var business = new Business
         {
             Name = request.Name.Trim(),
@@ -29,97 +33,21 @@ public class CreateDoctorHandler(AppDbContext db, ICurrentUser currentUser)
             ProfileImageUrl = request.ProfileImageUrl?.Trim(),
             CoverImageUrl = request.CoverImageUrl?.Trim(),
             CreatedByUserId = currentUser.Id,
+            Doctor = new Doctor
+            {
+                SpecializationId = request.SpecializationId ?? Guid.Empty,
+                VisitPrice = request.VisitPrice,
+                Gender = request.Gender ?? Gender.Male,
+            },
+            WorkingDays = request.WorkingDays?.Select(wd => new WorkingDay
+            {
+                Day = (System.DayOfWeek)wd.Day,
+                StartTime = TimeOnly.Parse(wd.StartTime),
+                EndTime = TimeOnly.Parse(wd.EndTime),
+            }).ToList() ?? [],
         };
 
         db.Businesses.Add(business);
-
-        if (request.SpecializationId.HasValue)
-        {
-            if (!await db.Set<Specialization>().AnyAsync(s => s.Id == request.SpecializationId.Value, ct))
-                throw new NotFoundException("Specialization not found");
-        }
-
-        var doctor = new Doctor
-        {
-            BusinessId = business.Id,
-            SpecializationId = request.SpecializationId ?? Guid.Empty,
-            VisitPrice = request.VisitPrice,
-            Gender = request.Gender ?? Gender.Male,
-        };
-
-        db.Set<Doctor>().Add(doctor);
-
-        if (request.WorkingDays is not null)
-        {
-            foreach (var wd in request.WorkingDays)
-            {
-                db.Set<WorkingDay>().Add(new WorkingDay
-                {
-                    BusinessId = business.Id,
-                    Day = (System.DayOfWeek)wd.Day,
-                    StartTime = TimeOnly.Parse(wd.StartTime),
-                    EndTime = TimeOnly.Parse(wd.EndTime),
-                });
-            }
-        }
-
-        if (request.Branches is not null)
-        {
-            foreach (var br in request.Branches)
-            {
-                var branch = new Business
-                {
-                    Name = br.Name.Trim(),
-                    Type = BusinessType.Doctor,
-                    CityId = br.CityId ?? business.CityId,
-                    Address = br.Address?.Trim(),
-                    Description = br.Description?.Trim(),
-                    ProfileImageUrl = br.ProfileImageUrl?.Trim(),
-                    CoverImageUrl = br.CoverImageUrl?.Trim(),
-                    Latitude = br.Latitude,
-                    Longitude = br.Longitude,
-                    ParentBusinessId = business.Id,
-                    CreatedByUserId = currentUser.Id,
-                };
-                db.Businesses.Add(branch);
-
-                db.Set<Doctor>().Add(new Doctor
-                {
-                    BusinessId = branch.Id,
-                    SpecializationId = doctor.SpecializationId,
-                    VisitPrice = br.VisitPrice,
-                    Gender = doctor.Gender,
-                });
-
-                if (br.WorkingDays is not null)
-                {
-                    foreach (var wd in br.WorkingDays)
-                    {
-                        db.Set<WorkingDay>().Add(new WorkingDay
-                        {
-                            BusinessId = branch.Id,
-                            Day = (System.DayOfWeek)wd.Day,
-                            StartTime = TimeOnly.Parse(wd.StartTime),
-                            EndTime = TimeOnly.Parse(wd.EndTime),
-                        });
-                    }
-                }
-
-                if (br.PhoneNumbers is not null)
-                {
-                    foreach (var pn in br.PhoneNumbers)
-                    {
-                        db.Set<PhoneNumber>().Add(new PhoneNumber
-                        {
-                            BusinessId = branch.Id,
-                            Number = pn.Number,
-                            Type = pn.Type,
-                        });
-                    }
-                }
-            }
-        }
-
         await db.SaveChangesAsync(ct);
 
         return new CreateDoctorResponse(business.Id, business.Name);

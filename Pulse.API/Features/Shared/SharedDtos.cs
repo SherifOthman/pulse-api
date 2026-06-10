@@ -35,20 +35,6 @@ public record BranchDto(
     List<WorkingDayDto> WorkingDays
 );
 
-public record CreateBranchDto(
-    string Name,
-    Guid? CityId,
-    string? Address,
-    string? Description,
-    string? ProfileImageUrl,
-    string? CoverImageUrl,
-    decimal? VisitPrice,
-    double? Latitude,
-    double? Longitude,
-    List<WorkingDayDto>? WorkingDays,
-    List<PhoneNumberDto>? PhoneNumbers
-);
-
 public record TestimonialDto(
     Guid Id,
     string? UserName,

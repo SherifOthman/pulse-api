@@ -14,6 +14,5 @@ public record CreateDoctorCommand(
     Guid? SpecializationId,
     decimal? VisitPrice,
     Gender? Gender,
-    List<WorkingDayDto>? WorkingDays,
-    List<CreateBranchDto>? Branches
+    List<WorkingDayDto>? WorkingDays
 ) : IRequest<CreateDoctorResponse>;

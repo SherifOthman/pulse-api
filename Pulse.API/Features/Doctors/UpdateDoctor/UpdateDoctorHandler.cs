@@ -14,6 +14,7 @@ public class UpdateDoctorHandler(AppDbContext db)
     {
         var business = await db.Businesses
             .Include(b => b.Doctor)
+            .Include(b => b.WorkingDays)
             .FirstOrDefaultAsync(b => b.Id == request.Id && b.Type == BusinessType.Doctor, ct);
 
         if (business is null)
@@ -59,19 +60,12 @@ public class UpdateDoctorHandler(AppDbContext db)
 
         if (request.WorkingDays is not null)
         {
-            var existing = await db.Set<WorkingDay>().Where(w => w.BusinessId == request.Id).ToListAsync(ct);
-            db.Set<WorkingDay>().RemoveRange(existing);
-
-            foreach (var wd in request.WorkingDays)
+            business.WorkingDays = request.WorkingDays.Select(wd => new WorkingDay
             {
-                db.Set<WorkingDay>().Add(new WorkingDay
-                {
-                    BusinessId = request.Id,
-                    Day = (System.DayOfWeek)wd.Day,
-                    StartTime = TimeOnly.Parse(wd.StartTime),
-                    EndTime = TimeOnly.Parse(wd.EndTime),
-                });
-            }
+                Day = (System.DayOfWeek)wd.Day,
+                StartTime = TimeOnly.Parse(wd.StartTime),
+                EndTime = TimeOnly.Parse(wd.EndTime),
+            }).ToList();
         }
 
         await db.SaveChangesAsync(ct);
