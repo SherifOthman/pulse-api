@@ -8,15 +8,8 @@ public class UpdateLaboratoryEndpoint : IEndpoint
     {
         app.MapPut("/dashboard/labs/{id:guid}", async (Guid id, UpdateLaboratoryCommand command, IMediator mediator) =>
         {
-            try
-            {
-                var result = await mediator.Send(command with { Id = id });
-                return Results.Ok(result);
-            }
-            catch (BadHttpRequestException ex)
-            {
-                return Results.BadRequest(new { message = ex.Message });
-            }
+            var result = await mediator.Send(command with { Id = id });
+            return Results.Ok(result);
         }).RequireAuthorization("ManagerOrAdmin");
     }
 }

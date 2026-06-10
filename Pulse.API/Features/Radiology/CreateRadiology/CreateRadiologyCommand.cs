@@ -4,9 +4,11 @@ namespace Pulse.API.Features.Radiology.CreateRadiology;
 
 public record CreateRadiologyCommand(
     string Name,
-    Guid CityId,
+    Guid? CityId,
     string? Address,
     string? Description,
     string? ProfileImageUrl,
-    string? CoverImageUrl
+    string? CoverImageUrl,
+    double? Latitude,
+    double? Longitude
 ) : IRequest<RadiologyResponse>;

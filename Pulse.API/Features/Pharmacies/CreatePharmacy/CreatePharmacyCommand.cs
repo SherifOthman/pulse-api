@@ -4,9 +4,11 @@ namespace Pulse.API.Features.Pharmacies.CreatePharmacy;
 
 public record CreatePharmacyCommand(
     string Name,
-    Guid CityId,
+    Guid? CityId,
     string? Address,
     string? Description,
     string? ProfileImageUrl,
-    string? CoverImageUrl
+    string? CoverImageUrl,
+    double? Latitude,
+    double? Longitude
 ) : IRequest<PharmacyResponse>;

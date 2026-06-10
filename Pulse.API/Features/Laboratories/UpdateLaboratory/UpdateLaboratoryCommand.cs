@@ -9,5 +9,7 @@ public record UpdateLaboratoryCommand(
     string? Address,
     string? Description,
     string? ProfileImageUrl,
-    string? CoverImageUrl
+    string? CoverImageUrl,
+    double? Latitude,
+    double? Longitude
 ) : IRequest<LabResponse>;

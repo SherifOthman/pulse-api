@@ -2,6 +2,7 @@ using Pulse.API.Features.Shared;
 
 namespace Pulse.API.Features.Laboratories.GetLaboratoryDetails;
 
+/// <summary>Dashboard detail response — no IsFavorite/HasUserReviewed (mobile-only).</summary>
 public record LaboratoryDetailsResponse(
     Guid Id,
     string Name,
@@ -15,13 +16,9 @@ public record LaboratoryDetailsResponse(
     double? Longitude,
     double AverageRating,
     int TotalRatings,
-    bool IsFavorite,
-    bool HasUserReviewed,
     List<WorkingDayDto> WorkingDays,
     List<PhoneNumberDto> PhoneNumbers,
     List<BranchDto> Branches,
     List<TestimonialDto> Testimonials,
     List<ServiceDto> Services
-) : BusinessDetailsResponse(Id, Name, ProfileImageUrl, CoverImageUrl, Description, Address,
-    Governorate, City, Latitude, Longitude, AverageRating, TotalRatings, IsFavorite,
-    HasUserReviewed, WorkingDays, PhoneNumbers, Branches, Testimonials, Services);
+);

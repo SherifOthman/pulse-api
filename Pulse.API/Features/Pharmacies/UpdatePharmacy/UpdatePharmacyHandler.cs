@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Pulse.API.Domain.Enums;
+using Pulse.API.Features.Shared;
+using Pulse.API.Infrastructure.Exceptions;
 using Pulse.API.Persistence;
 
 namespace Pulse.API.Features.Pharmacies.UpdatePharmacy;
@@ -14,29 +16,13 @@ public class UpdatePharmacyHandler(AppDbContext db)
             .FirstOrDefaultAsync(b => b.Id == request.Id && b.Type == BusinessType.Pharmacy, ct);
 
         if (business is null)
-            throw new KeyNotFoundException("Pharmacy not found");
+            throw new NotFoundException("Pharmacy not found");
 
-        if (!string.IsNullOrWhiteSpace(request.Name))
-            business.Name = request.Name.Trim();
-
-        if (request.CityId.HasValue)
-        {
-            if (!await db.Set<Domain.Entities.City>().AnyAsync(c => c.Id == request.CityId.Value, ct))
-                throw new BadHttpRequestException("City not found");
-            business.CityId = request.CityId.Value;
-        }
-
-        if (request.Address is not null)
-            business.Address = string.IsNullOrWhiteSpace(request.Address) ? null : request.Address.Trim();
-
-        if (request.Description is not null)
-            business.Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
-
-        if (request.ProfileImageUrl is not null)
-            business.ProfileImageUrl = string.IsNullOrWhiteSpace(request.ProfileImageUrl) ? null : request.ProfileImageUrl.Trim();
-
-        if (request.CoverImageUrl is not null)
-            business.CoverImageUrl = string.IsNullOrWhiteSpace(request.CoverImageUrl) ? null : request.CoverImageUrl.Trim();
+        await BusinessMappingHelpers.ApplyUpdatesAsync(
+            db, business,
+            request.Name, request.CityId, request.Address,
+            request.Description, request.ProfileImageUrl, request.CoverImageUrl,
+            request.Latitude, request.Longitude, ct);
 
         await db.SaveChangesAsync(ct);
         return new PharmacyResponse(business.Id, business.Name);

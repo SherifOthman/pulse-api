@@ -15,6 +15,8 @@ public record UpdateDoctorCommand(
     Guid? SpecializationId,
     decimal? VisitPrice,
     Gender? Gender,
+    double? Latitude,
+    double? Longitude,
     List<WorkingDayDto>? WorkingDays,
     List<PhoneNumberDto>? PhoneNumbers
 ) : IRequest<UpdateDoctorResponse>;

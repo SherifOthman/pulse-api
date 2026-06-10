@@ -8,15 +8,8 @@ public class DeletePharmacyEndpoint : IEndpoint
     {
         app.MapDelete("/dashboard/pharmacies/{id:guid}", async (Guid id, IMediator mediator) =>
         {
-            try
-            {
-                await mediator.Send(new DeletePharmacyCommand(id));
-                return Results.NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return Results.NotFound(new { message = ex.Message });
-            }
+            await mediator.Send(new DeletePharmacyCommand(id));
+            return Results.NoContent();
         }).RequireAuthorization("ManagerOrAdmin");
     }
 }

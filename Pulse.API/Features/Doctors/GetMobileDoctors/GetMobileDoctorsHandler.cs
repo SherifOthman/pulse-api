@@ -12,9 +12,9 @@ public class GetMobileDoctorsHandler(AppDbContext db)
     public async Task<PaginatedResponse<DoctorMobileListResponse>> Handle(
         GetMobileDoctorsQuery request, CancellationToken ct)
     {
-        var today = DateTime.Now.DayOfWeek;
-        var now = TimeOnly.FromDateTime(DateTime.Now);
-        var bq = request.BusinessQuery;
+        var today = DateTime.UtcNow.DayOfWeek;
+        var now   = TimeOnly.FromDateTime(DateTime.UtcNow);
+        var bq    = request.BusinessQuery;
 
         var query = db.Businesses
             .AsNoTracking()
@@ -34,19 +34,19 @@ public class GetMobileDoctorsHandler(AppDbContext db)
             b.ProfileImageUrl,
             SpecializationName = b.Doctor!.Specialization.Name,
             b.Doctor.VisitPrice,
-            GovernorateName = b.City.Governorate.Name,
-            AvgRating = b.Testimonials
-                .Select(t => (double)t.Rating)
-                .DefaultIfEmpty()
-                .Average(),
-            TotalRatings = b.Testimonials.Count,
+            GovernorateName    = b.City.Governorate.Name,
+            AvgRating          = b.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
+            TotalRatings       = b.Testimonials.Count,
+            // Compute the next working day inline — ordered by days-until offset
             NextWorkingDay = b.WorkingDays
                 .Select(w => new
                 {
                     w.Day,
                     w.StartTime,
                     w.EndTime,
-                    DaysUntil = w.Day >= today ? w.Day - today : 7 - (int)today + (int)w.Day
+                    DaysUntil = w.Day >= today
+                        ? w.Day - today
+                        : 7 - (int)today + (int)w.Day,
                 })
                 .OrderBy(w => w.DaysUntil)
                 .FirstOrDefault(),
@@ -55,25 +55,22 @@ public class GetMobileDoctorsHandler(AppDbContext db)
         var desc = bq.SortDirection?.ToLower() == "desc";
         projected = bq.SortBy?.ToLower() switch
         {
-            "price" => desc
-                ? projected.OrderByDescending(x => x.VisitPrice).ThenBy(x => x.Id)
-                : projected.OrderBy(x => x.VisitPrice).ThenBy(x => x.Id),
-            "rating" => desc
-                ? projected.OrderByDescending(x => x.AvgRating).ThenBy(x => x.Id)
-                : projected.OrderBy(x => x.AvgRating).ThenBy(x => x.Id),
-            _ => desc
-                ? projected.OrderByDescending(x => x.Name).ThenBy(x => x.Id)
-                : projected.OrderBy(x => x.Name).ThenBy(x => x.Id),
+            "price"  => desc ? projected.OrderByDescending(x => x.VisitPrice).ThenBy(x => x.Id)
+                              : projected.OrderBy(x => x.VisitPrice).ThenBy(x => x.Id),
+            "rating" => desc ? projected.OrderByDescending(x => x.AvgRating).ThenBy(x => x.Id)
+                              : projected.OrderBy(x => x.AvgRating).ThenBy(x => x.Id),
+            _        => desc ? projected.OrderByDescending(x => x.Name).ThenBy(x => x.Id)
+                              : projected.OrderBy(x => x.Name).ThenBy(x => x.Id),
         };
 
         var raw = await projected.ToPaginatedAsync(bq.Page, bq.PageSize, ct);
 
         var items = raw.Items.Select(r =>
         {
-            var isOpen = r.NextWorkingDay != null
-                && r.NextWorkingDay.Day == today
+            var isOpen = r.NextWorkingDay is not null
+                && r.NextWorkingDay.Day   == today
                 && r.NextWorkingDay.StartTime <= now
-                && r.NextWorkingDay.EndTime >= now;
+                && r.NextWorkingDay.EndTime   >= now;
 
             return new DoctorMobileListResponse(
                 r.Id,
@@ -82,7 +79,7 @@ public class GetMobileDoctorsHandler(AppDbContext db)
                 r.GovernorateName,
                 Math.Round(r.AvgRating, 1),
                 r.TotalRatings,
-                r.NextWorkingDay != null ? (int)r.NextWorkingDay.Day : 0,
+                r.NextWorkingDay is not null ? (int)r.NextWorkingDay.Day : 0,
                 r.NextWorkingDay?.StartTime.ToString("HH:mm"),
                 r.NextWorkingDay?.EndTime.ToString("HH:mm"),
                 isOpen,

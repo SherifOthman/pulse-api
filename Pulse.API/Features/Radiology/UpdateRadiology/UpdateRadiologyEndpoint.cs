@@ -8,19 +8,8 @@ public class UpdateRadiologyEndpoint : IEndpoint
     {
         app.MapPut("/dashboard/radiology/{id:guid}", async (Guid id, UpdateRadiologyCommand command, IMediator mediator) =>
         {
-            try
-            {
-                var result = await mediator.Send(command with { Id = id });
-                return Results.Ok(result);
-            }
-            catch (BadHttpRequestException ex)
-            {
-                return Results.BadRequest(new { message = ex.Message });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return Results.NotFound(new { message = ex.Message });
-            }
+            var result = await mediator.Send(command with { Id = id });
+            return Results.Ok(result);
         }).RequireAuthorization("ManagerOrAdmin");
     }
 }

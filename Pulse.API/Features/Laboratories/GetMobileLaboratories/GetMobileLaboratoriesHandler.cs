@@ -12,8 +12,8 @@ public class GetMobileLaboratoriesHandler(AppDbContext db)
     public async Task<PaginatedResponse<LaboratoryMobileListResponse>> Handle(
         GetMobileLaboratoriesQuery request, CancellationToken ct)
     {
-        var today = DateTime.Now.DayOfWeek;
-        var now = TimeOnly.FromDateTime(DateTime.Now);
+        var today = DateTime.UtcNow.DayOfWeek;
+        var now = TimeOnly.FromDateTime(DateTime.UtcNow);
         var bq = request.BusinessQuery;
 
         var query = db.Businesses

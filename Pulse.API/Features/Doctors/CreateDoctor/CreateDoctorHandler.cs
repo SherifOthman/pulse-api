@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Pulse.API.Domain.Entities;
 using Pulse.API.Domain.Enums;
+using Pulse.API.Features.Shared;
 using Pulse.API.Infrastructure;
 using Pulse.API.Infrastructure.Exceptions;
 using Pulse.API.Persistence;
@@ -23,44 +24,29 @@ public class CreateDoctorHandler(AppDbContext db, ICurrentUser currentUser)
             && !await db.Set<Specialization>().AnyAsync(s => s.Id == request.SpecializationId.Value, ct))
             throw new NotFoundException("Specialization not found");
 
-        if (request.WorkingDays is not null)
-        {
-            foreach (var wd in request.WorkingDays)
-            {
-                if (!TimeOnly.TryParse(wd.StartTime, out var start) || !TimeOnly.TryParse(wd.EndTime, out var end))
-                    throw new BadRequestException($"Invalid time format for day {wd.Day}");
-                if (start >= end)
-                    throw new BadRequestException($"Start time must be before end time for day {wd.Day}");
-            }
-        }
+        // Validate and map working days using shared helper
+        var workingDays = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays);
 
         var business = new Business
         {
-            Name = request.Name.Trim(),
-            Type = BusinessType.Doctor,
-            CityId = request.CityId ?? Guid.Empty,
-            Address = request.Address?.Trim(),
-            Description = request.Description?.Trim(),
+            Name            = request.Name.Trim(),
+            Type            = BusinessType.Doctor,
+            CityId          = request.CityId ?? Guid.Empty,
+            Address         = request.Address?.Trim(),
+            Description     = request.Description?.Trim(),
             ProfileImageUrl = request.ProfileImageUrl?.Trim(),
-            CoverImageUrl = request.CoverImageUrl?.Trim(),
+            CoverImageUrl   = request.CoverImageUrl?.Trim(),
+            Latitude        = request.Latitude,
+            Longitude       = request.Longitude,
             CreatedByUserId = currentUser.Id,
             Doctor = new Doctor
             {
                 SpecializationId = request.SpecializationId ?? Guid.Empty,
-                VisitPrice = request.VisitPrice,
-                Gender = request.Gender ?? Gender.Male,
+                VisitPrice       = request.VisitPrice,
+                Gender           = request.Gender ?? Gender.Male,
             },
-            WorkingDays = request.WorkingDays?.Select(wd => new WorkingDay
-            {
-                Day = (System.DayOfWeek)wd.Day,
-                StartTime = TimeOnly.Parse(wd.StartTime),
-                EndTime = TimeOnly.Parse(wd.EndTime),
-            }).ToList() ?? [],
-            PhoneNumbers = request.PhoneNumbers?.Select(pn => new PhoneNumber
-            {
-                Number = pn.Number,
-                Type = pn.Type,
-            }).ToList() ?? [],
+            WorkingDays  = workingDays,
+            PhoneNumbers = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers),
         };
 
         db.Businesses.Add(business);

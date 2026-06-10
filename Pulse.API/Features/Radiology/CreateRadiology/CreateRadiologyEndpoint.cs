@@ -8,15 +8,8 @@ public class CreateRadiologyEndpoint : IEndpoint
     {
         app.MapPost("/dashboard/radiology", async (CreateRadiologyCommand command, IMediator mediator) =>
         {
-            try
-            {
-                var result = await mediator.Send(command);
-                return Results.Ok(result);
-            }
-            catch (BadHttpRequestException ex)
-            {
-                return Results.BadRequest(new { message = ex.Message });
-            }
+            var result = await mediator.Send(command);
+            return Results.Created($"/dashboard/radiology/{result.Id}", result);
         }).RequireAuthorization("ManagerOrAdmin");
     }
 }

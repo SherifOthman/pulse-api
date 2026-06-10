@@ -2,6 +2,10 @@ using Pulse.API.Features.Shared;
 
 namespace Pulse.API.Features.Doctors;
 
+/// <summary>
+/// Mobile app detail response for a doctor.
+/// Includes IsFavorite / HasUserReviewed for the authenticated mobile user.
+/// </summary>
 public record DoctorMobileDetailsResponse(
     Guid Id,
     string Name,
@@ -11,6 +15,8 @@ public record DoctorMobileDetailsResponse(
     string? Address,
     string Governorate,
     string City,
+    double? Latitude,
+    double? Longitude,
     double AverageRating,
     int TotalRatings,
     bool IsFavorite,

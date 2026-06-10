@@ -1,7 +1,6 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Pulse.API.Domain.Entities;
 using Pulse.API.Domain.Enums;
+using Pulse.API.Features.Shared;
 using Pulse.API.Infrastructure;
 using Pulse.API.Persistence;
 
@@ -12,27 +11,14 @@ public class CreateRadiologyHandler(AppDbContext db, ICurrentUser currentUser)
 {
     public async Task<RadiologyResponse> Handle(CreateRadiologyCommand request, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
-            throw new BadHttpRequestException("Name is required");
-
-        if (!await db.Set<City>().AnyAsync(c => c.Id == request.CityId, ct))
-            throw new BadHttpRequestException("City not found");
-
-        var business = new Business
-        {
-            Name = request.Name.Trim(),
-            Type = BusinessType.Radiology,
-            CityId = request.CityId,
-            Address = request.Address?.Trim(),
-            Description = request.Description?.Trim(),
-            ProfileImageUrl = request.ProfileImageUrl?.Trim(),
-            CoverImageUrl = request.CoverImageUrl?.Trim(),
-            CreatedByUserId = currentUser.Id,
-        };
+        var business = await BusinessMappingHelpers.CreateBusinessAsync(
+            db, request.Name, request.CityId, request.Address,
+            request.Description, request.ProfileImageUrl, request.CoverImageUrl,
+            request.Latitude, request.Longitude,
+            BusinessType.Radiology, currentUser.Id, ct);
 
         db.Businesses.Add(business);
         await db.SaveChangesAsync(ct);
-
         return new RadiologyResponse(business.Id, business.Name);
     }
 }

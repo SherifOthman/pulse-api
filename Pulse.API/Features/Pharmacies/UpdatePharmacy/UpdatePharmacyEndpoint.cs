@@ -8,19 +8,8 @@ public class UpdatePharmacyEndpoint : IEndpoint
     {
         app.MapPut("/dashboard/pharmacies/{id:guid}", async (Guid id, UpdatePharmacyCommand command, IMediator mediator) =>
         {
-            try
-            {
-                var result = await mediator.Send(command with { Id = id });
-                return Results.Ok(result);
-            }
-            catch (BadHttpRequestException ex)
-            {
-                return Results.BadRequest(new { message = ex.Message });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return Results.NotFound(new { message = ex.Message });
-            }
+            var result = await mediator.Send(command with { Id = id });
+            return Results.Ok(result);
         }).RequireAuthorization("ManagerOrAdmin");
     }
 }

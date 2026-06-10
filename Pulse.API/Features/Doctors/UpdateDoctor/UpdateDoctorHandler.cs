@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Pulse.API.Domain.Entities;
 using Pulse.API.Domain.Enums;
+using Pulse.API.Features.Shared;
 using Pulse.API.Infrastructure.Exceptions;
 using Pulse.API.Persistence;
 
@@ -43,6 +44,9 @@ public class UpdateDoctorHandler(AppDbContext db)
         if (request.CoverImageUrl is not null)
             business.CoverImageUrl = string.IsNullOrWhiteSpace(request.CoverImageUrl) ? null : request.CoverImageUrl.Trim();
 
+        if (request.Latitude.HasValue)  business.Latitude  = request.Latitude;
+        if (request.Longitude.HasValue) business.Longitude = request.Longitude;
+
         if (business.Doctor is not null)
         {
             if (request.SpecializationId.HasValue)
@@ -52,39 +56,15 @@ public class UpdateDoctorHandler(AppDbContext db)
                 business.Doctor.SpecializationId = request.SpecializationId.Value;
             }
 
-            if (request.VisitPrice.HasValue)
-                business.Doctor.VisitPrice = request.VisitPrice;
-
-            if (request.Gender.HasValue)
-                business.Doctor.Gender = request.Gender.Value;
+            if (request.VisitPrice.HasValue)   business.Doctor.VisitPrice = request.VisitPrice;
+            if (request.Gender.HasValue)        business.Doctor.Gender     = request.Gender.Value;
         }
 
         if (request.WorkingDays is not null)
-        {
-            foreach (var wd in request.WorkingDays)
-            {
-                if (!TimeOnly.TryParse(wd.StartTime, out var start) || !TimeOnly.TryParse(wd.EndTime, out var end))
-                    throw new BadRequestException($"Invalid time format for day {wd.Day}");
-                if (start >= end)
-                    throw new BadRequestException($"Start time must be before end time for day {wd.Day}");
-            }
-
-            business.WorkingDays = request.WorkingDays.Select(wd => new WorkingDay
-            {
-                Day = (System.DayOfWeek)wd.Day,
-                StartTime = TimeOnly.Parse(wd.StartTime),
-                EndTime = TimeOnly.Parse(wd.EndTime),
-            }).ToList();
-        }
+            business.WorkingDays = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays);
 
         if (request.PhoneNumbers is not null)
-        {
-            business.PhoneNumbers = request.PhoneNumbers.Select(pn => new PhoneNumber
-            {
-                Number = pn.Number,
-                Type = pn.Type,
-            }).ToList();
-        }
+            business.PhoneNumbers = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers);
 
         await db.SaveChangesAsync(ct);
         return new UpdateDoctorResponse(business.Id, business.Name);

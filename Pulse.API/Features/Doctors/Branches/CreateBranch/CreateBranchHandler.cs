@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Pulse.API.Domain.Entities;
 using Pulse.API.Domain.Enums;
+using Pulse.API.Features.Shared;
 using Pulse.API.Infrastructure;
 using Pulse.API.Infrastructure.Exceptions;
 using Pulse.API.Persistence;
@@ -18,42 +19,35 @@ public class CreateBranchHandler(AppDbContext db, ICurrentUser currentUser)
 
         var parent = await db.Businesses
             .Include(b => b.Doctor)
-            .FirstOrDefaultAsync(b => b.Id == request.DoctorId && b.Type == BusinessType.Doctor && b.ParentBusinessId == null, ct);
+            .FirstOrDefaultAsync(b =>
+                b.Id == request.DoctorId &&
+                b.Type == BusinessType.Doctor &&
+                b.ParentBusinessId == null, ct);
 
         if (parent is null || parent.Doctor is null)
             throw new NotFoundException("Parent doctor not found");
 
         var branch = new Business
         {
-            Name = request.Name.Trim(),
-            Type = BusinessType.Doctor,
-            CityId = request.CityId ?? parent.CityId,
-            Address = request.Address?.Trim(),
-            Latitude = request.Latitude,
-            Longitude = request.Longitude,
+            Name             = request.Name.Trim(),
+            Type             = BusinessType.Doctor,
+            CityId           = request.CityId ?? parent.CityId,
+            Address          = request.Address?.Trim(),
+            Latitude         = request.Latitude,
+            Longitude        = request.Longitude,
             ParentBusinessId = request.DoctorId,
-            CreatedByUserId = currentUser.Id,
+            CreatedByUserId  = currentUser.Id,
             Doctor = new Doctor
             {
                 SpecializationId = parent.Doctor.SpecializationId,
-                VisitPrice = request.VisitPrice,
-                Gender = parent.Doctor.Gender,
+                VisitPrice       = request.VisitPrice,
+                Gender           = parent.Doctor.Gender,
             },
-            WorkingDays = request.WorkingDays?.Select(wd => new WorkingDay
-            {
-                Day = (System.DayOfWeek)wd.Day,
-                StartTime = TimeOnly.Parse(wd.StartTime),
-                EndTime = TimeOnly.Parse(wd.EndTime),
-            }).ToList() ?? [],
-            PhoneNumbers = request.PhoneNumbers?.Select(pn => new PhoneNumber
-            {
-                Number = pn.Number,
-                Type = pn.Type,
-            }).ToList() ?? [],
+            WorkingDays  = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays),
+            PhoneNumbers = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers),
         };
 
         db.Businesses.Add(branch);
-
         await db.SaveChangesAsync(ct);
 
         return new CreateBranchResponse(branch.Id, branch.Name);
