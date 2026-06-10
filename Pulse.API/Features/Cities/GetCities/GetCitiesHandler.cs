@@ -19,10 +19,6 @@ public class GetCitiesHandler(AppDbContext db)
             query = query.Where(c =>
                 c.Businesses.Any(b => b.Type == type && b.ParentBusinessId == null));
         }
-        else
-        {
-            query = query.Where(c => c.Businesses.Any());
-        }
 
         if (request.GovernorateId.HasValue)
             query = query.Where(c => c.GovernorateId == request.GovernorateId.Value);
