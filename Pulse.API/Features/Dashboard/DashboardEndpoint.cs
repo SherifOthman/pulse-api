@@ -7,7 +7,7 @@ public class DashboardEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/stats", async (IMediator mediator) =>
+        app.MapGet("/dashboard/stats", async (IMediator mediator) =>
         {
             var result = await mediator.Send(new DashboardQuery());
             return Results.Ok(result);
