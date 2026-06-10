@@ -7,5 +7,6 @@ namespace Pulse.API.Features.Doctors.GetMobileDoctors;
 public record GetMobileDoctorsQuery(
     BusinessQuery BusinessQuery,
     Gender? Gender,
-    Guid? SpecializationId
+    Guid? SpecializationId,
+    string BaseUrl
 ) : IRequest<PaginatedResponse<DoctorMobileListResponse>>;

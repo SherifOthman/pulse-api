@@ -17,7 +17,8 @@ public class GetMobileDoctorDetailsEndpoint : IEndpoint
                     userId = parsed;
             }
 
-            var result = await mediator.Send(new GetMobileDoctorDetailsQuery(id, userId));
+            var baseUrl = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
+            var result = await mediator.Send(new GetMobileDoctorDetailsQuery(id, userId, baseUrl));
             return result is null ? Results.NotFound() : Results.Ok(result);
         });
     }

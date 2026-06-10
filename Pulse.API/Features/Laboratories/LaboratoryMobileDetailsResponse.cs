@@ -11,6 +11,8 @@ public record LaboratoryMobileDetailsResponse(
     string? Address,
     string Governorate,
     string City,
+    double? Latitude,
+    double? Longitude,
     double AverageRating,
     int TotalRatings,
     bool IsFavorite,

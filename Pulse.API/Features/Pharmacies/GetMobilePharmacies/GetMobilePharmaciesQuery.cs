@@ -4,5 +4,6 @@ using MediatR;
 namespace Pulse.API.Features.Pharmacies.GetMobilePharmacies;
 
 public record GetMobilePharmaciesQuery(
-    BusinessQuery BusinessQuery
+    BusinessQuery BusinessQuery,
+    string BaseUrl
 ) : IRequest<PaginatedResponse<PharmacyMobileListResponse>>;

@@ -8,7 +8,7 @@ public class GetMobileDoctorsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/mobile/doctors", async (IMediator mediator,
+        app.MapGet("/mobile/doctors", async (HttpContext httpContext, IMediator mediator,
             Guid? governorateId,
             Guid? cityId,
             string? name,
@@ -20,7 +20,8 @@ public class GetMobileDoctorsEndpoint : IEndpoint
             Guid? specializationId = null) =>
         {
             var bq = new BusinessQuery(governorateId, cityId, name, sortBy, sortDirection, page, pageSize);
-            var result = await mediator.Send(new GetMobileDoctorsQuery(bq, (Gender?)gender, specializationId));
+            var baseUrl = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
+            var result = await mediator.Send(new GetMobileDoctorsQuery(bq, (Gender?)gender, specializationId, baseUrl));
             return Results.Ok(result);
         });
     }

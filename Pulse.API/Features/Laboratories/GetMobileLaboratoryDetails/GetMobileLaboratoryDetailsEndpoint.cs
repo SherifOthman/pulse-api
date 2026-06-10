@@ -12,12 +12,11 @@ public class GetMobileLaboratoryDetailsEndpoint : IEndpoint
             Guid? userId = null;
             if (httpContext.User.Identity?.IsAuthenticated == true)
             {
-                var userIdStr = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (Guid.TryParse(userIdStr, out var parsed))
-                    userId = parsed;
+                var s = httpContext.User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (Guid.TryParse(s, out var parsed)) userId = parsed;
             }
-
-            var result = await mediator.Send(new GetMobileLaboratoryDetailsQuery(id, userId));
+            var baseUrl = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
+            var result = await mediator.Send(new GetMobileLaboratoryDetailsQuery(id, userId, baseUrl));
             return result is null ? Results.NotFound() : Results.Ok(result);
         });
     }

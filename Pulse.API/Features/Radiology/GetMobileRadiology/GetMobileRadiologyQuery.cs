@@ -4,5 +4,6 @@ using MediatR;
 namespace Pulse.API.Features.Radiology.GetMobileRadiology;
 
 public record GetMobileRadiologyQuery(
-    BusinessQuery BusinessQuery
+    BusinessQuery BusinessQuery,
+    string BaseUrl
 ) : IRequest<PaginatedResponse<RadiologyMobileListResponse>>;

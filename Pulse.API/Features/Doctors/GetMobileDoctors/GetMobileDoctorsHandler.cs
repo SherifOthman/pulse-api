@@ -1,3 +1,4 @@
+using Pulse.API.Infrastructure;
 using Pulse.API.Domain.Enums;
 using Pulse.API.Features.Shared;
 using Pulse.API.Persistence;
@@ -72,10 +73,12 @@ public class GetMobileDoctorsHandler(AppDbContext db)
                 && r.NextWorkingDay.StartTime <= now
                 && r.NextWorkingDay.EndTime   >= now;
 
+            var profileImageUrl = ToAbsolute(r.ProfileImageUrl, request.BaseUrl);
+
             return new DoctorMobileListResponse(
                 r.Id,
                 r.Name,
-                r.ProfileImageUrl,
+                profileImageUrl,
                 r.GovernorateName,
                 Math.Round(r.AvgRating, 1),
                 r.TotalRatings,
@@ -90,5 +93,12 @@ public class GetMobileDoctorsHandler(AppDbContext db)
 
         return new PaginatedResponse<DoctorMobileListResponse>(
             items, raw.Page, raw.PageSize, raw.TotalCount, raw.HasMore);
+    }
+
+    private static string? ToAbsolute(string? path, string baseUrl)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return null;
+        if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
+        return $"{baseUrl}{(path.StartsWith('/') ? path : '/' + path)}";
     }
 }

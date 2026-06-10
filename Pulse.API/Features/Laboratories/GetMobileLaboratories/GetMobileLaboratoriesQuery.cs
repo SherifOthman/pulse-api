@@ -4,5 +4,6 @@ using MediatR;
 namespace Pulse.API.Features.Laboratories.GetMobileLaboratories;
 
 public record GetMobileLaboratoriesQuery(
-    BusinessQuery BusinessQuery
+    BusinessQuery BusinessQuery,
+    string BaseUrl
 ) : IRequest<PaginatedResponse<LaboratoryMobileListResponse>>;
