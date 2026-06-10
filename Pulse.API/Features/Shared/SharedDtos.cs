@@ -28,6 +28,13 @@ public record BranchDto(
     List<WorkingDayDto> WorkingDays
 );
 
+public record CreateBranchDto(
+    string Name,
+    string? Address,
+    List<WorkingDayDto>? WorkingDays,
+    List<PhoneNumberDto>? PhoneNumbers
+);
+
 public record TestimonialDto(
     Guid Id,
     string? UserName,
