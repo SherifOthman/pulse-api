@@ -8,5 +8,6 @@ public record DoctorListResponse(
     string Governorate,
     double AverageRating,
     decimal? VisitPrice,
+    int Gender,        // 0=Male, 1=Female
     string? CreatedBy
 );

@@ -15,6 +15,7 @@ public class UpdateDoctorHandler(AppDbContext db)
         var business = await db.Businesses
             .Include(b => b.Doctor)
             .Include(b => b.WorkingDays)
+            .Include(b => b.PhoneNumbers)
             .FirstOrDefaultAsync(b => b.Id == request.Id && b.Type == BusinessType.Doctor, ct);
 
         if (business is null)
@@ -60,11 +61,28 @@ public class UpdateDoctorHandler(AppDbContext db)
 
         if (request.WorkingDays is not null)
         {
+            foreach (var wd in request.WorkingDays)
+            {
+                if (!TimeOnly.TryParse(wd.StartTime, out var start) || !TimeOnly.TryParse(wd.EndTime, out var end))
+                    throw new BadRequestException($"Invalid time format for day {wd.Day}");
+                if (start >= end)
+                    throw new BadRequestException($"Start time must be before end time for day {wd.Day}");
+            }
+
             business.WorkingDays = request.WorkingDays.Select(wd => new WorkingDay
             {
                 Day = (System.DayOfWeek)wd.Day,
                 StartTime = TimeOnly.Parse(wd.StartTime),
                 EndTime = TimeOnly.Parse(wd.EndTime),
+            }).ToList();
+        }
+
+        if (request.PhoneNumbers is not null)
+        {
+            business.PhoneNumbers = request.PhoneNumbers.Select(pn => new PhoneNumber
+            {
+                Number = pn.Number,
+                Type = pn.Type,
             }).ToList();
         }
 

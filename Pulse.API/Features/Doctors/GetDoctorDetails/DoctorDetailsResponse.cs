@@ -10,13 +10,14 @@ public record DoctorDetailsResponse(
     string? Description,
     string? Address,
     string Governorate,
+    Guid GovernorateId,
     string City,
+    Guid CityId,
     double? Latitude,
     double? Longitude,
     double AverageRating,
     int TotalRatings,
-    bool IsFavorite,
-    bool HasUserReviewed,
+    int Gender,          // 0=Male, 1=Female
     List<WorkingDayDto> WorkingDays,
     List<PhoneNumberDto> PhoneNumbers,
     List<BranchDto> Branches,
@@ -24,6 +25,4 @@ public record DoctorDetailsResponse(
     List<ServiceDto> Services,
     string Specialization,
     decimal? VisitPrice
-) : BusinessDetailsResponse(Id, Name, ProfileImageUrl, CoverImageUrl, Description, Address,
-    Governorate, City, Latitude, Longitude, AverageRating, TotalRatings, IsFavorite,
-    HasUserReviewed, WorkingDays, PhoneNumbers, Branches, Testimonials, Services);
+);

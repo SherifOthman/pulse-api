@@ -36,6 +36,7 @@ public class GetDoctorsHandler(AppDbContext db)
                 .DefaultIfEmpty()
                 .Average(),
             b.Doctor.VisitPrice,
+            b.Doctor.Gender,
             CreatedBy = b.CreatedByUser != null ? b.CreatedByUser.FullName : null,
         });
 
@@ -63,6 +64,7 @@ public class GetDoctorsHandler(AppDbContext db)
             r.GovernorateName,
             Math.Round(r.AvgRating, 1),
             r.VisitPrice,
+            (int)r.Gender,
             r.CreatedBy
         )).ToList();
 

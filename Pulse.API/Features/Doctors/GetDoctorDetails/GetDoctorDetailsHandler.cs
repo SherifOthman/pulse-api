@@ -1,13 +1,12 @@
 using Pulse.API.Domain.Enums;
 using Pulse.API.Features.Shared;
-using Pulse.API.Infrastructure;
 using Pulse.API.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Pulse.API.Features.Doctors.GetDoctorDetails;
 
-public class GetDoctorDetailsHandler(AppDbContext db, ICurrentUser currentUser)
+public class GetDoctorDetailsHandler(AppDbContext db)
     : IRequestHandler<GetDoctorDetailsQuery, DoctorDetailsResponse?>
 {
     public async Task<DoctorDetailsResponse?> Handle(GetDoctorDetailsQuery request, CancellationToken ct)
@@ -20,16 +19,17 @@ public class GetDoctorDetailsHandler(AppDbContext db, ICurrentUser currentUser)
                 x.Id, x.Name, x.ProfileImageUrl, x.CoverImageUrl,
                 x.Description, x.Address, x.Latitude, x.Longitude,
                 SpecializationName = x.Doctor!.Specialization.Name,
+                x.Doctor.Gender,
                 x.Doctor.VisitPrice,
+                x.CityId,
+                GovernorateId   = x.City.Governorate.Id,
                 CityName        = x.City.Name,
                 GovernorateName = x.City.Governorate.Name,
                 AvgRating       = x.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
                 TotalRatings    = x.Testimonials.Count,
-                IsFavorite      = db.UserFavorite.Any(f => f.UserId == currentUser.Id && f.BuissnessId == x.Id),
-                HasUserReviewed = x.Testimonials.Any(t => t.UserId == currentUser.Id),
-                WorkingDays     = x.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList(),
-                PhoneNumbers    = x.PhoneNumbers.Select(p => new { p.Number, p.Type }).ToList(),
-                Branches        = x.Branches.Select(br => new
+                WorkingDays  = x.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList(),
+                PhoneNumbers = x.PhoneNumbers.Select(p => new { p.Number, p.Type }).ToList(),
+                Branches     = x.Branches.Select(br => new
                 {
                     br.Id, br.Name, br.Address, br.ProfileImageUrl,
                     br.CoverImageUrl, br.Description,
@@ -40,7 +40,7 @@ public class GetDoctorDetailsHandler(AppDbContext db, ICurrentUser currentUser)
                     PhoneNumbers = br.PhoneNumbers.Select(p => new { p.Number, p.Type }).ToList(),
                     WorkingDays  = br.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList()
                 }).ToList(),
-                Testimonials = x.Testimonials.OrderByDescending(t => t.CreatedAt).Take(3)
+                Testimonials = x.Testimonials.OrderByDescending(t => t.CreatedAt).Take(5)
                     .Select(t => new { t.Id, t.User.FullName, t.User.ImageUrl, t.Rating, t.Text, t.CreatedAt }).ToList(),
                 Services = x.BusinessServices.Select(bs => bs.Service.Name).ToList()
             })
@@ -50,8 +50,10 @@ public class GetDoctorDetailsHandler(AppDbContext db, ICurrentUser currentUser)
 
         return new DoctorDetailsResponse(
             b.Id, b.Name, b.ProfileImageUrl, b.CoverImageUrl, b.Description, b.Address,
-            b.GovernorateName, b.CityName, b.Latitude, b.Longitude,
-            Math.Round(b.AvgRating, 1), b.TotalRatings, b.IsFavorite, b.HasUserReviewed,
+            b.GovernorateName, b.GovernorateId, b.CityName, b.CityId,
+            b.Latitude, b.Longitude,
+            Math.Round(b.AvgRating, 1), b.TotalRatings,
+            (int)b.Gender,
             b.WorkingDays.Select(w => new WorkingDayDto((int)w.Day, w.StartTime.ToString("HH:mm"), w.EndTime.ToString("HH:mm"))).OrderBy(w => w.Day).ToList(),
             b.PhoneNumbers.Select(p => new PhoneNumberDto(p.Number, p.Type)).ToList(),
             b.Branches.Select(br => new BranchDto(

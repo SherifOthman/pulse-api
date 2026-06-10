@@ -6,7 +6,7 @@ namespace Pulse.API.Features.Doctors.CreateDoctor;
 
 public record CreateDoctorCommand(
     string Name,
-    Guid CityId,
+    Guid? CityId,
     string? Address,
     string? Description,
     string? ProfileImageUrl,
@@ -14,5 +14,6 @@ public record CreateDoctorCommand(
     Guid? SpecializationId,
     decimal? VisitPrice,
     Gender? Gender,
-    List<WorkingDayDto>? WorkingDays
+    List<WorkingDayDto>? WorkingDays,
+    List<PhoneNumberDto>? PhoneNumbers
 ) : IRequest<CreateDoctorResponse>;

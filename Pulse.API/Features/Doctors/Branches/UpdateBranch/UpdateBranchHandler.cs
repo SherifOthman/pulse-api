@@ -15,6 +15,7 @@ public class UpdateBranchHandler(AppDbContext db)
         var branch = await db.Businesses
             .Include(b => b.Doctor)
             .Include(b => b.WorkingDays)
+            .Include(b => b.PhoneNumbers)
             .FirstOrDefaultAsync(b => b.Id == request.Id && b.Type == BusinessType.Doctor && b.ParentBusinessId != null, ct);
 
         if (branch is null)
@@ -40,6 +41,14 @@ public class UpdateBranchHandler(AppDbContext db)
 
         if (request.WorkingDays is not null)
         {
+            foreach (var wd in request.WorkingDays)
+            {
+                if (!TimeOnly.TryParse(wd.StartTime, out var start) || !TimeOnly.TryParse(wd.EndTime, out var end))
+                    throw new BadRequestException($"Invalid time format for day {wd.Day}");
+                if (start >= end)
+                    throw new BadRequestException($"Start time must be before end time for day {wd.Day}");
+            }
+
             branch.WorkingDays = request.WorkingDays.Select(wd => new WorkingDay
             {
                 Day = (System.DayOfWeek)wd.Day,
