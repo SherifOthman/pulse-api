@@ -13,11 +13,19 @@ public class GetCitiesHandler(AppDbContext db)
     {
         var query = db.Set<City>().AsNoTracking();
 
-        if (request.BusinessType.HasValue && Enum.IsDefined(typeof(BusinessType), request.BusinessType.Value))
+        if (request.All)
+        {
+            // No business filter — return all cities
+        }
+        else if (request.BusinessType.HasValue && Enum.IsDefined(typeof(BusinessType), request.BusinessType.Value))
         {
             var type = (BusinessType)request.BusinessType.Value;
             query = query.Where(c =>
                 c.Businesses.Any(b => b.Type == type && b.ParentBusinessId == null));
+        }
+        else
+        {
+            query = query.Where(c => c.Businesses.Any());
         }
 
         if (request.GovernorateId.HasValue)

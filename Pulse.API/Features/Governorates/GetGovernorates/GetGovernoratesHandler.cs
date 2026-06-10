@@ -19,10 +19,6 @@ public class GetGovernoratesHandler(AppDbContext db)
             query = query.Where(g => g.Cities.Any(c =>
                 c.Businesses.Any(b => b.Type == type && b.ParentBusinessId == null)));
         }
-        else
-        {
-            query = query.Where(g => g.Cities.Any(c => c.Businesses.Any()));
-        }
 
         return await query
             .OrderBy(g => g.Name)

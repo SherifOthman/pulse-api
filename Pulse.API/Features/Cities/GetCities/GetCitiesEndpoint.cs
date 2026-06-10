@@ -6,9 +6,9 @@ public class GetCitiesEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/dashboard/cities", async (IMediator mediator, Guid? governorateId, int? businessType) =>
+        app.MapGet("/dashboard/cities", async (IMediator mediator, Guid? governorateId, int? businessType, bool all = false) =>
         {
-            var result = await mediator.Send(new GetCitiesQuery(governorateId, businessType));
+            var result = await mediator.Send(new GetCitiesQuery(governorateId, businessType, all));
             return Results.Ok(result);
         });
     }
