@@ -2,4 +2,4 @@ using MediatR;
 
 namespace Pulse.API.Features.Specializations.GetSpecializations;
 
-public record GetSpecializationsQuery : IRequest<List<SpecializationResponse>>;
+public record GetSpecializationsQuery(int? BusinessType = null) : IRequest<List<SpecializationResponse>>;
