@@ -74,55 +74,6 @@ public class UpdateDoctorHandler(AppDbContext db)
             }
         }
 
-        if (request.Branches is not null)
-        {
-            var existingBranches = await db.Businesses
-                .Where(b => b.ParentBusinessId == request.Id)
-                .ToListAsync(ct);
-            db.Businesses.RemoveRange(existingBranches);
-
-            foreach (var br in request.Branches)
-            {
-                var branch = new Business
-                {
-                    Name = br.Name.Trim(),
-                    Type = BusinessType.Doctor,
-                    CityId = business.CityId,
-                    Address = br.Address?.Trim(),
-                    ParentBusinessId = request.Id,
-                    CreatedByUserId = business.CreatedByUserId,
-                };
-                db.Businesses.Add(branch);
-
-                if (br.WorkingDays is not null)
-                {
-                    foreach (var wd in br.WorkingDays)
-                    {
-                        db.Set<WorkingDay>().Add(new WorkingDay
-                        {
-                            BusinessId = branch.Id,
-                            Day = (System.DayOfWeek)wd.Day,
-                            StartTime = TimeOnly.Parse(wd.StartTime),
-                            EndTime = TimeOnly.Parse(wd.EndTime),
-                        });
-                    }
-                }
-
-                if (br.PhoneNumbers is not null)
-                {
-                    foreach (var pn in br.PhoneNumbers)
-                    {
-                        db.Set<PhoneNumber>().Add(new PhoneNumber
-                        {
-                            BusinessId = branch.Id,
-                            Number = pn.Number,
-                            Type = pn.Type,
-                        });
-                    }
-                }
-            }
-        }
-
         await db.SaveChangesAsync(ct);
         return new UpdateDoctorResponse(business.Id, business.Name);
     }

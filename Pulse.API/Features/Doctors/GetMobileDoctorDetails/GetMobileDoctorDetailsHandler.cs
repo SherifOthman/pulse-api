@@ -34,6 +34,11 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
                 Branches     = x.Branches.Select(br => new
                 {
                     br.Id, br.Name, br.Address, br.ProfileImageUrl,
+                    br.CoverImageUrl, br.Description,
+                    GovernorateName = br.City.Governorate.Name,
+                    CityName        = br.City.Name,
+                    VisitPrice      = br.Doctor!.VisitPrice,
+                    br.Latitude, br.Longitude,
                     PhoneNumbers = br.PhoneNumbers.Select(p => new { p.Number, p.Type }).ToList(),
                     WorkingDays  = br.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList()
                 }).ToList(),
@@ -54,6 +59,9 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
             b.PhoneNumbers.Select(p => new PhoneNumberDto(p.Number, p.Type)).ToList(),
             b.Branches.Select(br => new BranchDto(
                 br.Id, br.Name, br.Address, br.ProfileImageUrl,
+                br.CoverImageUrl, br.Description,
+                br.GovernorateName, br.CityName,
+                br.VisitPrice, br.Latitude, br.Longitude,
                 br.PhoneNumbers.Select(p => new PhoneNumberDto(p.Number, p.Type)).ToList(),
                 br.WorkingDays.Select(w => new WorkingDayDto((int)w.Day, w.StartTime.ToString("HH:mm"), w.EndTime.ToString("HH:mm"))).OrderBy(w => w.Day).ToList()
             )).ToList(),

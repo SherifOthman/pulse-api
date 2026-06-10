@@ -71,12 +71,25 @@ public class CreateDoctorHandler(AppDbContext db, ICurrentUser currentUser)
                 {
                     Name = br.Name.Trim(),
                     Type = BusinessType.Doctor,
-                    CityId = business.CityId,
+                    CityId = br.CityId ?? business.CityId,
                     Address = br.Address?.Trim(),
+                    Description = br.Description?.Trim(),
+                    ProfileImageUrl = br.ProfileImageUrl?.Trim(),
+                    CoverImageUrl = br.CoverImageUrl?.Trim(),
+                    Latitude = br.Latitude,
+                    Longitude = br.Longitude,
                     ParentBusinessId = business.Id,
                     CreatedByUserId = currentUser.Id,
                 };
                 db.Businesses.Add(branch);
+
+                db.Set<Doctor>().Add(new Doctor
+                {
+                    BusinessId = branch.Id,
+                    SpecializationId = doctor.SpecializationId,
+                    VisitPrice = br.VisitPrice,
+                    Gender = doctor.Gender,
+                });
 
                 if (br.WorkingDays is not null)
                 {

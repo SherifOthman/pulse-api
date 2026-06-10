@@ -24,13 +24,27 @@ public record BranchDto(
     string Name,
     string? Address,
     string? ProfileImageUrl,
+    string? CoverImageUrl,
+    string? Description,
+    string? Governorate,
+    string? City,
+    decimal? VisitPrice,
+    double? Latitude,
+    double? Longitude,
     List<PhoneNumberDto> PhoneNumbers,
     List<WorkingDayDto> WorkingDays
 );
 
 public record CreateBranchDto(
     string Name,
+    Guid? CityId,
     string? Address,
+    string? Description,
+    string? ProfileImageUrl,
+    string? CoverImageUrl,
+    decimal? VisitPrice,
+    double? Latitude,
+    double? Longitude,
     List<WorkingDayDto>? WorkingDays,
     List<PhoneNumberDto>? PhoneNumbers
 );
