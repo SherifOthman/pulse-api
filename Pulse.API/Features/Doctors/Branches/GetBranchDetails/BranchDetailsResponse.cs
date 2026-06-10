@@ -5,11 +5,9 @@ namespace Pulse.API.Features.Doctors.Branches.GetBranchDetails;
 public record BranchDetailsResponse(
     Guid Id,
     string Name,
-    string? Description,
     string? Address,
-    string? ProfileImageUrl,
-    string? CoverImageUrl,
     string Governorate,
+    Guid GovernorateId,
     string City,
     Guid CityId,
     decimal? VisitPrice,

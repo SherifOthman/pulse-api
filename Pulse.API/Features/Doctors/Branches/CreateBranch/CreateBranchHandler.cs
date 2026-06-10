@@ -29,51 +29,30 @@ public class CreateBranchHandler(AppDbContext db, ICurrentUser currentUser)
             Type = BusinessType.Doctor,
             CityId = request.CityId ?? parent.CityId,
             Address = request.Address?.Trim(),
-            Description = request.Description?.Trim(),
-            ProfileImageUrl = request.ProfileImageUrl?.Trim(),
-            CoverImageUrl = request.CoverImageUrl?.Trim(),
             Latitude = request.Latitude,
             Longitude = request.Longitude,
             ParentBusinessId = request.DoctorId,
             CreatedByUserId = currentUser.Id,
+            Doctor = new Doctor
+            {
+                SpecializationId = parent.Doctor.SpecializationId,
+                VisitPrice = request.VisitPrice,
+                Gender = parent.Doctor.Gender,
+            },
+            WorkingDays = request.WorkingDays?.Select(wd => new WorkingDay
+            {
+                Day = (System.DayOfWeek)wd.Day,
+                StartTime = TimeOnly.Parse(wd.StartTime),
+                EndTime = TimeOnly.Parse(wd.EndTime),
+            }).ToList() ?? [],
+            PhoneNumbers = request.PhoneNumbers?.Select(pn => new PhoneNumber
+            {
+                Number = pn.Number,
+                Type = pn.Type,
+            }).ToList() ?? [],
         };
 
         db.Businesses.Add(branch);
-
-        db.Set<Doctor>().Add(new Doctor
-        {
-            BusinessId = branch.Id,
-            SpecializationId = parent.Doctor.SpecializationId,
-            VisitPrice = request.VisitPrice,
-            Gender = parent.Doctor.Gender,
-        });
-
-        if (request.WorkingDays is not null)
-        {
-            foreach (var wd in request.WorkingDays)
-            {
-                db.Set<WorkingDay>().Add(new WorkingDay
-                {
-                    BusinessId = branch.Id,
-                    Day = (System.DayOfWeek)wd.Day,
-                    StartTime = TimeOnly.Parse(wd.StartTime),
-                    EndTime = TimeOnly.Parse(wd.EndTime),
-                });
-            }
-        }
-
-        if (request.PhoneNumbers is not null)
-        {
-            foreach (var pn in request.PhoneNumbers)
-            {
-                db.Set<PhoneNumber>().Add(new PhoneNumber
-                {
-                    BusinessId = branch.Id,
-                    Number = pn.Number,
-                    Type = pn.Type,
-                });
-            }
-        }
 
         await db.SaveChangesAsync(ct);
 
