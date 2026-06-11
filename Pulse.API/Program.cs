@@ -68,10 +68,11 @@ app.UseAuthorization();
 
 app.MapEndpoints();
 
-// Seed admin user on startup
+// Seed master data on startup
 var seedScope = app.Services.CreateScope();
 var seedDb = seedScope.ServiceProvider.GetRequiredService<AppDbContext>();
 await GovernorateSeeder.SeedAsync(seedDb);
+await CitySeeder.SeedAsync(seedDb);
 await AdminSeeder.SeedAsync(app.Services);
 seedScope.Dispose();
 

@@ -1,3 +1,4 @@
+using FluentValidation;
 using Pulse.API.Infrastructure.Exceptions;
 
 namespace Pulse.API.Infrastructure;
@@ -31,6 +32,8 @@ public class ExceptionMiddleware(RequestDelegate next)
             ForbiddenException       => (403, ex.Message),
             ConflictException        => (409, ex.Message),
             KeyNotFoundException     => (404, ex.Message),
+            ValidationException      => (400, string.Join(" | ",
+                ((ValidationException)ex).Errors.Select(e => e.ErrorMessage))),
             _                        => (500, isDev
                 ? $"{ex.GetType().Name}: {ex.Message}\n{ex.InnerException?.Message}"
                 : "An unexpected error occurred")

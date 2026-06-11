@@ -1,5 +1,8 @@
+using FluentValidation;
+using Pulse.API.Behaviors;
 using Pulse.API.Domain.Entities;
 using Pulse.API.Persistence;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,7 +35,12 @@ public static class EntityFrameworkDep
             };
         });
 
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>), serviceLifetime: ServiceLifetime.Scoped);
+        });
+        services.AddValidatorsFromAssembly(typeof(Program).Assembly);
     }
 }
 
