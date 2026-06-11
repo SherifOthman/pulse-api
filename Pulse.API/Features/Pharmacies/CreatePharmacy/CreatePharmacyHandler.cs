@@ -28,6 +28,10 @@ public class CreatePharmacyHandler(AppDbContext db, ICurrentUser currentUser)
         db.Businesses.Add(business);
         await db.SaveChangesAsync(ct);
 
+        if (request.Services is { Count: > 0 })
+            await BusinessServiceHelpers.LinkServicesAsync(
+                db, business.Id, BusinessType.Pharmacy, request.Services, ct);
+
         return new PharmacyResponse(business.Id, business.Name);
     }
 }

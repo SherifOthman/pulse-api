@@ -19,6 +19,11 @@ public class CreateLaboratoryHandler(AppDbContext db, ICurrentUser currentUser)
 
         db.Businesses.Add(business);
         await db.SaveChangesAsync(ct);
+
+        if (request.Services is { Count: > 0 })
+            await BusinessServiceHelpers.LinkServicesAsync(
+                db, business.Id, BusinessType.Laboratory, request.Services, ct);
+
         return new LabResponse(business.Id, business.Name);
     }
 }

@@ -31,6 +31,7 @@ public class GetDoctorDetailsHandler(AppDbContext db)
                 GovernorateId      = x.City.Governorate.Id,
                 CityName           = x.City.Name,
                 GovernorateName    = x.City.Governorate.Name,
+                SpecializationId   = x.Doctor!.SpecializationId,
                 SpecializationName = x.Doctor!.Specialization.Name,
                 x.Doctor.VisitPrice,
                 x.Doctor.Gender,
@@ -123,6 +124,7 @@ public class GetDoctorDetailsHandler(AppDbContext db)
             b.Services
                 .Select(s => new ServiceDto(s))
                 .ToList(),
+            b.SpecializationId,
             b.SpecializationName,
             b.VisitPrice
         );

@@ -56,15 +56,35 @@ public class UpdateDoctorHandler(AppDbContext db)
                 business.Doctor.SpecializationId = request.SpecializationId.Value;
             }
 
-            if (request.VisitPrice.HasValue)   business.Doctor.VisitPrice = request.VisitPrice;
-            if (request.Gender.HasValue)        business.Doctor.Gender     = request.Gender.Value;
+            if (request.VisitPrice.HasValue) business.Doctor.VisitPrice = request.VisitPrice;
+            if (request.Gender.HasValue)     business.Doctor.Gender     = request.Gender.Value;
         }
 
         if (request.WorkingDays is not null)
-            business.WorkingDays = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays);
+        {
+            // Clear and re-add — safer than replacing the collection reference
+            // EF Core properly sets BusinessId when items are added to the tracked collection
+            db.Set<WorkingDay>().RemoveRange(business.WorkingDays);
+            await db.SaveChangesAsync(ct); // flush deletes first
+            var newDays = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays);
+            foreach (var day in newDays)
+            {
+                day.BusinessId = business.Id;
+                business.WorkingDays.Add(day);
+            }
+        }
 
         if (request.PhoneNumbers is not null)
-            business.PhoneNumbers = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers);
+        {
+            db.Set<PhoneNumber>().RemoveRange(business.PhoneNumbers);
+            await db.SaveChangesAsync(ct); // flush deletes first
+            var newNumbers = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers);
+            foreach (var phone in newNumbers)
+            {
+                phone.BusinessId = business.Id;
+                business.PhoneNumbers.Add(phone);
+            }
+        }
 
         await db.SaveChangesAsync(ct);
         return new UpdateDoctorResponse(business.Id, business.Name);

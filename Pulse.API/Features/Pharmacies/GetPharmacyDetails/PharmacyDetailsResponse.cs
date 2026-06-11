@@ -15,6 +15,8 @@ public record PharmacyDetailsResponse(
     string? Address,
     string Governorate,
     string City,
+    Guid? GovernorateId,
+    Guid? CityId,
     double? Latitude,
     double? Longitude,
     double AverageRating,

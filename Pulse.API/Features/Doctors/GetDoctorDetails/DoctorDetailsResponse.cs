@@ -28,6 +28,7 @@ public record DoctorDetailsResponse(
     List<BranchDto> Branches,
     List<TestimonialDto> Testimonials,
     List<ServiceDto> Services,
+    Guid SpecializationId,
     string Specialization,
     decimal? VisitPrice
 );

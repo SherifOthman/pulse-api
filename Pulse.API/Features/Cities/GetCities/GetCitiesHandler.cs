@@ -23,8 +23,11 @@ public class GetCitiesHandler(AppDbContext db)
             query = query.Where(c =>
                 c.Businesses.Any(b => b.Type == type && b.ParentBusinessId == null));
         }
-        else
+        else if (!request.GovernorateId.HasValue)
         {
+            // Only require Businesses.Any() when NOT filtering by a specific governorate.
+            // When picking a city in a form for a new business, all cities in that
+            // governorate should be visible regardless of existing businesses.
             query = query.Where(c => c.Businesses.Any());
         }
 

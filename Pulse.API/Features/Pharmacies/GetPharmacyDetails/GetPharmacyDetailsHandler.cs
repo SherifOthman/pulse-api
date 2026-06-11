@@ -21,7 +21,9 @@ public class GetPharmacyDetailsHandler(AppDbContext db)
                 x.Id, x.Name, x.ProfileImageUrl, x.CoverImageUrl,
                 x.Description, x.Address, x.Latitude, x.Longitude,
                 CityName        = x.City.Name,
+                CityId          = x.City.Id,
                 GovernorateName = x.City.Governorate.Name,
+                GovernorateId   = x.City.Governorate.Id,
                 AvgRating    = x.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
                 TotalRatings = x.Testimonials.Count,
                 WorkingDays  = x.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList(),
@@ -47,7 +49,7 @@ public class GetPharmacyDetailsHandler(AppDbContext db)
 
         return new PharmacyDetailsResponse(
             b.Id, b.Name, b.ProfileImageUrl, b.CoverImageUrl, b.Description, b.Address,
-            b.GovernorateName, b.CityName, b.Latitude, b.Longitude,
+            b.GovernorateName, b.CityName, b.GovernorateId, b.CityId, b.Latitude, b.Longitude,
             Math.Round(b.AvgRating, 1), b.TotalRatings,
             b.WorkingDays
                 .Select(w => new WorkingDayDto((int)w.Day, w.StartTime.ToString("HH:mm"), w.EndTime.ToString("HH:mm")))

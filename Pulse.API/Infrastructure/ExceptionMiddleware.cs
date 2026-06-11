@@ -18,6 +18,10 @@ public class ExceptionMiddleware(RequestDelegate next)
 
     private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
+        var isDev = context.RequestServices
+            .GetRequiredService<IWebHostEnvironment>()
+            .IsDevelopment();
+
         var (statusCode, message) = ex switch
         {
             NotFoundException        => (404, ex.Message),
@@ -27,7 +31,9 @@ public class ExceptionMiddleware(RequestDelegate next)
             ForbiddenException       => (403, ex.Message),
             ConflictException        => (409, ex.Message),
             KeyNotFoundException     => (404, ex.Message),
-            _                        => (500, "An unexpected error occurred")
+            _                        => (500, isDev
+                ? $"{ex.GetType().Name}: {ex.Message}\n{ex.InnerException?.Message}"
+                : "An unexpected error occurred")
         };
 
         context.Response.StatusCode = statusCode;

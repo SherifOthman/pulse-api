@@ -19,6 +19,11 @@ public class CreateRadiologyHandler(AppDbContext db, ICurrentUser currentUser)
 
         db.Businesses.Add(business);
         await db.SaveChangesAsync(ct);
+
+        if (request.Services is { Count: > 0 })
+            await BusinessServiceHelpers.LinkServicesAsync(
+                db, business.Id, BusinessType.Radiology, request.Services, ct);
+
         return new RadiologyResponse(business.Id, business.Name);
     }
 }

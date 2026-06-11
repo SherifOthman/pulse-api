@@ -2,6 +2,8 @@ using MediatR;
 
 namespace Pulse.API.Features.Laboratories.CreateLaboratory;
 
+using Pulse.API.Features.Shared;
+
 public record CreateLaboratoryCommand(
     string Name,
     Guid? CityId,
@@ -10,5 +12,6 @@ public record CreateLaboratoryCommand(
     string? ProfileImageUrl,
     string? CoverImageUrl,
     double? Latitude,
-    double? Longitude
+    double? Longitude,
+    List<BusinessServiceItem>? Services = null
 ) : IRequest<LabResponse>;

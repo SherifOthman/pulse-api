@@ -2,6 +2,8 @@ using MediatR;
 
 namespace Pulse.API.Features.Pharmacies.CreatePharmacy;
 
+using Pulse.API.Features.Shared;
+
 public record CreatePharmacyCommand(
     string Name,
     Guid? CityId,
@@ -10,5 +12,6 @@ public record CreatePharmacyCommand(
     string? ProfileImageUrl,
     string? CoverImageUrl,
     double? Latitude,
-    double? Longitude
+    double? Longitude,
+    List<BusinessServiceItem>? Services = null
 ) : IRequest<PharmacyResponse>;
