@@ -7,6 +7,6 @@ public class CreateSpecializationCommandValidator : AbstractValidator<CreateSpec
 {
     public CreateSpecializationCommandValidator()
     {
-        RuleFor(x => x.Name).NotEmpty().MaximumLength(250);
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
     }
 }

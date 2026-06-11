@@ -7,6 +7,6 @@ public class UpdateSpecializationCommandValidator : AbstractValidator<UpdateSpec
 {
     public UpdateSpecializationCommandValidator()
     {
-        RuleFor(x => x.Name).MaximumLength(250).When(x => x.Name is not null);
+        RuleFor(x => x.Name).MaximumLength(100).When(x => x.Name is not null);
     }
 }

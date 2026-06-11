@@ -10,7 +10,7 @@ public class SharedUpdateBranchCommandValidator : AbstractValidator<SharedUpdate
 {
     public SharedUpdateBranchCommandValidator(AppDbContext db)
     {
-        RuleFor(x => x.Name).MaximumLength(250).When(x => x.Name is not null);
+        RuleFor(x => x.Name).MaximumLength(100).When(x => x.Name is not null);
         RuleFor(x => x.CityId).MustAsync(async (id, ct) => await db.Set<City>().AnyAsync(c => c.Id == id, ct))
             .WithMessage("City does not exist").When(x => x.CityId.HasValue);
         RuleFor(x => x.Address).MaximumLength(500).When(x => x.Address is not null);

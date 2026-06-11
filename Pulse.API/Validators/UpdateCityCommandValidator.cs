@@ -10,7 +10,7 @@ public class UpdateCityCommandValidator : AbstractValidator<UpdateCityCommand>
 {
     public UpdateCityCommandValidator(AppDbContext db)
     {
-        RuleFor(x => x.Name).MaximumLength(250).When(x => x.Name is not null);
+        RuleFor(x => x.Name).MaximumLength(100).When(x => x.Name is not null);
         RuleFor(x => x.GovernorateId)
             .MustAsync(async (id, ct) => await db.Set<Governorate>().AnyAsync(g => g.Id == id, ct))
             .WithMessage("Governorate does not exist").When(x => x.GovernorateId.HasValue);

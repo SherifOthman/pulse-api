@@ -34,14 +34,20 @@ public static class BusinessMappingHelpers
         if (string.IsNullOrWhiteSpace(name))
             throw new BadRequestException("Name is required");
 
-        if (cityId.HasValue && !await db.Set<City>().AnyAsync(c => c.Id == cityId.Value, ct))
+        Guid resolvedCityId;
+        if (!cityId.HasValue)
+            throw new BadRequestException("City is required");
+
+        if (!await db.Set<City>().AnyAsync(c => c.Id == cityId.Value, ct))
             throw new NotFoundException("City not found");
+
+        resolvedCityId = cityId.Value;
 
         return new Business
         {
             Name            = name.Trim(),
             Type            = type,
-            CityId          = cityId ?? Guid.Empty,
+            CityId          = resolvedCityId,
             Address         = address?.Trim(),
             Description     = description?.Trim(),
             ProfileImageUrl = profileImageUrl?.Trim(),

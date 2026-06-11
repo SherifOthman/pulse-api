@@ -11,7 +11,7 @@ public class DoctorsCreateBranchCommandValidator : AbstractValidator<CreateBranc
 {
     public DoctorsCreateBranchCommandValidator(AppDbContext db)
     {
-        RuleFor(x => x.Name).NotEmpty().MaximumLength(250);
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
         RuleFor(x => x.DoctorId).NotEmpty()
             .MustAsync(async (id, ct) => await db.Set<Business>()
                 .AnyAsync(b => b.Id == id && b.Type == BusinessType.Doctor, ct))

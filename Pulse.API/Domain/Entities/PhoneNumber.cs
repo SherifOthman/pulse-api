@@ -1,9 +1,7 @@
 namespace Pulse.API.Domain.Entities;
 
-public class PhoneNumber
+public class PhoneNumber : Entity
 {
-    public Guid Id { get; set; }
-
     public Guid BusinessId { get; set; }
 
     public Business Business { get; set; } = null!;

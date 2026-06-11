@@ -17,7 +17,10 @@ public class CreateDoctorHandler(AppDbContext db, ICurrentUser currentUser)
         if (string.IsNullOrWhiteSpace(request.Name))
             throw new BadRequestException("Name is required");
 
-        if (request.CityId.HasValue && !await db.Set<City>().AnyAsync(c => c.Id == request.CityId.Value, ct))
+        if (!request.CityId.HasValue)
+            throw new BadRequestException("City is required");
+
+        if (!await db.Set<City>().AnyAsync(c => c.Id == request.CityId.Value, ct))
             throw new NotFoundException("City not found");
 
         if (request.SpecializationId.HasValue
@@ -31,7 +34,7 @@ public class CreateDoctorHandler(AppDbContext db, ICurrentUser currentUser)
         {
             Name            = request.Name.Trim(),
             Type            = BusinessType.Doctor,
-            CityId          = request.CityId ?? Guid.Empty,
+            CityId          = request.CityId.Value,
             Address         = request.Address?.Trim(),
             Description     = request.Description?.Trim(),
             ProfileImageUrl = request.ProfileImageUrl?.Trim(),

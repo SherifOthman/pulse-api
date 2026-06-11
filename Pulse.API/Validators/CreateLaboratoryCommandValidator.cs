@@ -10,7 +10,7 @@ public class CreateLaboratoryCommandValidator : AbstractValidator<CreateLaborato
 {
     public CreateLaboratoryCommandValidator(AppDbContext db)
     {
-        RuleFor(x => x.Name).NotEmpty().MaximumLength(250);
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
         RuleFor(x => x.CityId).NotEmpty()
             .MustAsync(async (id, ct) => await db.Set<City>().AnyAsync(c => c.Id == id, ct))
             .WithMessage("City does not exist");

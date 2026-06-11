@@ -11,7 +11,7 @@ public class SharedCreateBranchCommandValidator : AbstractValidator<SharedCreate
 {
     public SharedCreateBranchCommandValidator(AppDbContext db)
     {
-        RuleFor(x => x.Name).NotEmpty().MaximumLength(250);
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
         RuleFor(x => x.BusinessId).NotEmpty()
             .MustAsync(async (id, ct) => await db.Set<Business>().AnyAsync(b => b.Id == id, ct))
             .WithMessage("Business does not exist");

@@ -12,14 +12,16 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
         if (!validators.Any()) return await next();
 
         var context = new ValidationContext<TRequest>(request);
-        var failures = validators
-            .Select(v => v.Validate(context))
-            .SelectMany(r => r.Errors)
-            .Where(f => f is not null)
-            .ToList();
+        var failures = new List<ValidationFailure>();
+
+        foreach (var validator in validators)
+        {
+            var result = await validator.ValidateAsync(context, ct);
+            failures.AddRange(result.Errors.Where(f => f is not null));
+        }
 
         if (failures.Count != 0)
-            throw new ValidationException(failures);
+            throw new ValidationException("Validation failed", failures);
 
         return await next();
     }

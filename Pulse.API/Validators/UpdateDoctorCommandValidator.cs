@@ -10,7 +10,7 @@ public class UpdateDoctorCommandValidator : AbstractValidator<UpdateDoctorComman
 {
     public UpdateDoctorCommandValidator(AppDbContext db)
     {
-        RuleFor(x => x.Name).MaximumLength(250).When(x => x.Name is not null);
+        RuleFor(x => x.Name).MaximumLength(100).When(x => x.Name is not null);
         RuleFor(x => x.CityId).MustAsync(async (id, ct) => await db.Set<City>().AnyAsync(c => c.Id == id, ct))
             .WithMessage("City does not exist").When(x => x.CityId.HasValue);
         RuleFor(x => x.SpecializationId).MustAsync(async (id, ct) => await db.Set<Specialization>().AnyAsync(s => s.Id == id, ct))
