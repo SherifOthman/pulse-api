@@ -24,6 +24,20 @@ namespace Pulse.API.Persistence.Configurations
                 .HasMaxLength(50)
                 .IsRequired();
 
+            builder.Property(x => x.CreatedAt)
+                .HasColumnType("datetime2");
+
+            builder.Property(x => x.ExpiresAt)
+                .HasColumnType("datetime2");
+
+            builder.Property(x => x.RevokedAt)
+                .HasColumnType("datetime2")
+                .IsRequired(false);
+
+            builder.Property(x => x.ReplacedByTokenHash)
+                .HasMaxLength(450)
+                .IsRequired(false);
+
             builder.HasIndex(x => x.TokenHash)
                 .IsUnique();
 

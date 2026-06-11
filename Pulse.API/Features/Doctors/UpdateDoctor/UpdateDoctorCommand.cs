@@ -13,7 +13,6 @@ public record UpdateDoctorCommand(
     string? ProfileImageUrl,
     string? CoverImageUrl,
     Guid? SpecializationId,
-    decimal? VisitPrice,
     Gender? Gender,
     double? Latitude,
     double? Longitude,

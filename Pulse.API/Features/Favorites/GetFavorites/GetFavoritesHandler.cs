@@ -10,7 +10,7 @@ public class GetFavoritesHandler(AppDbContext db, ICurrentUser currentUser)
 {
     public async Task<List<FavoriteListItemResponse>> Handle(GetFavoritesQuery request, CancellationToken ct)
     {
-        return await db.UserFavorite
+        var items = await db.UserFavorite
             .AsNoTracking()
             .Where(f => f.UserId == currentUser.Id)
             .Select(f => new FavoriteListItemResponse(
@@ -24,10 +24,14 @@ public class GetFavoritesHandler(AppDbContext db, ICurrentUser currentUser)
                 f.Business.Testimonials.Count,
                 (int)f.Business.Type
             ))
-            .ToListAsync(ct)
-            .ContinueWith(t => t.Result
-                .OrderBy(f => f.BusinessType)
-                .ThenBy(f => f.Name)
-                .ToList(), ct);
+            .ToListAsync(ct);
+
+        return items
+            .Select(f => request.BaseUrl is not null
+                ? f with { ProfileImageUrl = UrlHelper.ToAbsolute(f.ProfileImageUrl, request.BaseUrl) }
+                : f)
+            .OrderBy(f => f.BusinessType)
+            .ThenBy(f => f.Name)
+            .ToList();
     }
 }

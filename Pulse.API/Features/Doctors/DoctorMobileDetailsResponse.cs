@@ -26,6 +26,5 @@ public record DoctorMobileDetailsResponse(
     List<BranchDto> Branches,
     List<TestimonialDto> Testimonials,
     List<ServiceDto> Services,
-    string Specialization,
-    decimal? VisitPrice
+    string Specialization
 );

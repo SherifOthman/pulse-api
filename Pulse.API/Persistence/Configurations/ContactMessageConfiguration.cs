@@ -8,7 +8,6 @@ public class ContactMessageConfiguration : IEntityTypeConfiguration<ContactMessa
 {
     public void Configure(EntityTypeBuilder<ContactMessage> builder)
     {
-
         builder.ToTable("ContactMessages");
 
         builder.HasKey(x => x.Id);
@@ -25,12 +24,17 @@ public class ContactMessageConfiguration : IEntityTypeConfiguration<ContactMessa
             .HasMaxLength(20)
             .IsRequired(false);
 
-        builder.Property(x=>x.Subject)
+        builder.Property(x => x.Subject)
             .HasMaxLength(100)
             .IsRequired();
 
         builder.Property(x => x.Message)
-           .HasMaxLength(-1);
+            .HasMaxLength(-1);
 
+        builder.Property(x => x.IsRead)
+            .IsRequired();
+
+        builder.Property(x => x.CreatedAt)
+            .HasColumnType("datetimeoffset");
     }
 }

@@ -8,6 +8,6 @@ public class Testimonial : Entity
     public ApplicationUser User { get; set; } = null!;
     public string Text { get; set; } = null!;
     public byte Rating { get; set; }
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
 }

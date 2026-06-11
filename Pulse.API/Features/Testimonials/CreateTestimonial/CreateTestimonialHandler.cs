@@ -27,7 +27,7 @@ public class CreateTestimonialHandler(AppDbContext db, ICurrentUser currentUser)
             UserId = currentUser.Id,
             Rating = Math.Clamp(request.Rating, (byte)1, (byte)5),
             Text = request.Text,
-            CreatedAt = DateTimeOffset.Now
+            CreatedAt = DateTimeOffset.UtcNow
         };
 
         db.Testimonials.Add(testimonial);

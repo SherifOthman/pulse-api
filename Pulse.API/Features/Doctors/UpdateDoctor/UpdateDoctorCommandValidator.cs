@@ -17,7 +17,6 @@ public class UpdateDoctorCommandValidator : AbstractValidator<UpdateDoctorComman
         RuleFor(x => x.SpecializationId).MustAsync(async (id, ct) => await db.Set<Specialization>().AnyAsync(s => s.Id == id, ct))
             .WithMessage("Specialization does not exist").When(x => x.SpecializationId.HasValue);
         RuleFor(x => x.Gender).IsInEnum().When(x => x.Gender is not null);
-        RuleFor(x => x.VisitPrice).GreaterThanOrEqualTo(0).When(x => x.VisitPrice.HasValue);
         RuleFor(x => x.Description).MaximumLength(500).When(x => x.Description is not null);
         RuleFor(x => x.Address).MaximumLength(500).When(x => x.Address is not null);
         RuleFor(x => x.Latitude).InclusiveBetween(-90, 90).When(x => x.Latitude.HasValue);

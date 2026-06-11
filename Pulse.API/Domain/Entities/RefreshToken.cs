@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Pulse.API.Domain.Entities;
 
 public class RefreshToken : Entity
@@ -18,6 +20,7 @@ public class RefreshToken : Entity
     public string CreatedByIp { get; set; } = null!;
     public string? RevokedByIp { get; set; }
 
+    [NotMapped]
     public bool IsActive => RevokedAt == null && DateTime.UtcNow < ExpiresAt;
 
 

@@ -2,4 +2,4 @@ using MediatR;
 
 namespace Pulse.API.Features.Favorites.GetFavorites;
 
-public record GetFavoritesQuery : IRequest<List<FavoriteListItemResponse>>;
+public record GetFavoritesQuery(string? BaseUrl = null) : IRequest<List<FavoriteListItemResponse>>;

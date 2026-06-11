@@ -21,16 +21,15 @@ public record ServiceDto(
 
 public record BranchDto(
     Guid Id,
+    Guid ParentBusinessId,
     string Name,
     string? Address,
-    string? ProfileImageUrl,
-    string? CoverImageUrl,
-    string? Description,
     string? Governorate,
     string? City,
     decimal? VisitPrice,
     double? Latitude,
     double? Longitude,
+    bool IsOpen,
     List<PhoneNumberDto> PhoneNumbers,
     List<WorkingDayDto> WorkingDays
 );

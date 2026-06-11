@@ -18,8 +18,13 @@ public class TestimonialConfiguration : IEntityTypeConfiguration<Testimonial>
              .HasMaxLength(500)
              .IsRequired();
 
-        builder.Property(x=>x.Rating) 
+        builder.Property(x => x.Rating) 
             .IsRequired();
+
+        builder.ToTable(t => t.HasCheckConstraint("CK_Testimonials_Rating", "[Rating] BETWEEN 1 AND 5"));
+
+        builder.Property(x => x.CreatedAt)
+            .HasColumnType("datetimeoffset");
 
         builder.HasOne(x => x.Business)
             .WithMany(x => x.Testimonials)

@@ -18,7 +18,8 @@ public class BusinessServiceConfiguration : IEntityTypeConfiguration<BusinessSer
 
         builder.HasOne(x => x.Service)
             .WithMany(x => x.BusinessServices)
-            .HasForeignKey(x => x.ServiceId);
+            .HasForeignKey(x => x.ServiceId)
+            .OnDelete(DeleteBehavior.Restrict);
 
 
         builder.HasIndex(x => x.ServiceId);

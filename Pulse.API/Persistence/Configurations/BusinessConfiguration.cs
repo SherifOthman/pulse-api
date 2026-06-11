@@ -17,37 +17,36 @@ public class BusinessConfiguration : IEntityTypeConfiguration<Business>
             .IsRequired();
 
         builder.Property(x => x.Type)
+            .HasConversion<int>()
             .IsRequired();
 
         builder.Property(x => x.Description)
             .HasMaxLength(500)
             .IsRequired(false);
 
-        builder.Property(x => x.WorkingHours)
-            .HasMaxLength(100)
-            .IsRequired(false); ;
-
         builder.Property(x => x.Address)
             .HasMaxLength(250)
-            .IsRequired(false); ;
+            .IsRequired(false);
 
         builder.Property(x => x.ProfileImageUrl)
             .HasMaxLength(500)
-            .IsRequired(false); ;
+            .IsRequired(false);
 
         builder.Property(x => x.CoverImageUrl)
             .HasMaxLength(500)
-            .IsRequired(false); ;
+            .IsRequired(false);
 
+        builder.Property(x => x.Latitude)
+            .HasColumnType("float")
+            .IsRequired(false);
 
-        builder.HasOne(x => x.ParentBusiness)
-            .WithMany(x => x.Branches)
-            .HasForeignKey(x => x.ParentBusinessId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.Property(x => x.Longitude)
+            .HasColumnType("float")
+            .IsRequired(false);
 
         builder.HasOne(x => x.City)
-            .WithMany(x=>x.Businesses)
-            .HasForeignKey(x=>x.CityId)
+            .WithMany(x => x.Businesses)
+            .HasForeignKey(x => x.CityId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.CreatedByUser)
@@ -55,5 +54,25 @@ public class BusinessConfiguration : IEntityTypeConfiguration<Business>
             .HasForeignKey(x => x.CreatedByUserId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // 1:1 profile relationships
+        builder.HasOne(x => x.DoctorProfile)
+            .WithOne(x => x.Business)
+            .HasForeignKey<DoctorProfile>(x => x.BusinessId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.PharmacyProfile)
+            .WithOne(x => x.Business)
+            .HasForeignKey<PharmacyProfile>(x => x.BusinessId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.LaboratoryProfile)
+            .WithOne(x => x.Business)
+            .HasForeignKey<LaboratoryProfile>(x => x.BusinessId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.RadiologyProfile)
+            .WithOne(x => x.Business)
+            .HasForeignKey<RadiologyProfile>(x => x.BusinessId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -4,26 +4,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Pulse.API.Persistence.Configurations;
 
-public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
+public class DoctorProfileConfiguration : IEntityTypeConfiguration<DoctorProfile>
 {
-    public void Configure(EntityTypeBuilder<Doctor> builder)
+    public void Configure(EntityTypeBuilder<DoctorProfile> builder)
     {
-        builder.ToTable("Doctors");
+        builder.ToTable("DoctorProfiles");
 
         builder.HasKey(x => x.BusinessId);
 
-        builder.HasOne(x => x.Business)
-            .WithOne(x => x.Doctor)
-            .HasForeignKey<Doctor>(x=>x.BusinessId);
-
-        builder.HasOne(x=>x.Specialization)
-            .WithMany(x=>x.Doctors)
-            .HasForeignKey(x=>x.SpecializationId)
+        builder.HasOne(x => x.Specialization)
+            .WithMany(x => x.Doctors)
+            .HasForeignKey(x => x.SpecializationId)
             .OnDelete(DeleteBehavior.Restrict);
-
-
-        builder.Property(x => x.VisitPrice)
-            .HasColumnType("decimal(18,2)");
 
         builder.Property(x => x.Gender)
             .HasConversion<int>()

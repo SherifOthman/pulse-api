@@ -17,6 +17,7 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
             .IsRequired();
 
         builder.Property(x => x.BusinessType)
+            .HasConversion<int>()
             .IsRequired();
 
     }

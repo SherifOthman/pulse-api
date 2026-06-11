@@ -12,9 +12,10 @@ public class GetFavoritesEndpoints : IEndpoint
             return Results.Ok(result);
         }).RequireAuthorization("ManagerOrAdmin");
 
-        app.MapGet("/mobile/favorites", async (IMediator mediator) =>
+        app.MapGet("/mobile/favorites", async (HttpContext httpContext, IMediator mediator) =>
         {
-            var result = await mediator.Send(new GetFavoritesQuery());
+            var baseUrl = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
+            var result = await mediator.Send(new GetFavoritesQuery(baseUrl));
             return Results.Ok(result);
         }).RequireAuthorization();
     }

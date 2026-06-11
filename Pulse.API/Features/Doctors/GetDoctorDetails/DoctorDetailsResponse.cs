@@ -29,6 +29,5 @@ public record DoctorDetailsResponse(
     List<TestimonialDto> Testimonials,
     List<ServiceDto> Services,
     Guid SpecializationId,
-    string Specialization,
-    decimal? VisitPrice
+    string Specialization
 );
