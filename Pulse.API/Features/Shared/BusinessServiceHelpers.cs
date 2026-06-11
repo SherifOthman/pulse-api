@@ -46,7 +46,6 @@ public static class BusinessServiceHelpers
                 {
                     var svc = new Service { Name = trimmed, BusinessType = businessType };
                     db.Set<Service>().Add(svc);
-                    await db.SaveChangesAsync(ct);
                     resolvedIds.Add(svc.Id);
                 }
             }

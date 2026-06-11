@@ -37,19 +37,23 @@ public class UpdateBranchHandler(AppDbContext db)
         if (request.WorkingDays is not null)
         {
             db.Set<WorkingDay>().RemoveRange(branch.WorkingDays);
-            await db.SaveChangesAsync(ct);
             var newDays = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays);
             foreach (var day in newDays)
-                branch.WorkingDays.Add(day);
+            {
+                day.BranchId = branch.Id;
+                db.Set<WorkingDay>().Add(day);
+            }
         }
 
         if (request.PhoneNumbers is not null)
         {
             db.Set<PhoneNumber>().RemoveRange(branch.PhoneNumbers);
-            await db.SaveChangesAsync(ct);
             var newNumbers = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers);
             foreach (var phone in newNumbers)
-                branch.PhoneNumbers.Add(phone);
+            {
+                phone.BranchId = branch.Id;
+                db.Set<PhoneNumber>().Add(phone);
+            }
         }
 
         await db.SaveChangesAsync(ct);

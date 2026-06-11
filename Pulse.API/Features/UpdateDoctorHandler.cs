@@ -61,20 +61,27 @@ public class UpdateDoctorHandler(AppDbContext db)
 
         if (request.WorkingDays is not null)
         {
+            // Delete existing rows and insert fresh ones.
+            // We add new entities directly to the DbSet (not via the nav collection)
+            // to avoid EF re-evaluating the relationship when the nav collection changes.
             db.Set<WorkingDay>().RemoveRange(business.WorkingDays);
-            await db.SaveChangesAsync(ct);
             var newDays = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays);
             foreach (var day in newDays)
-                business.WorkingDays.Add(day);
+            {
+                day.BusinessId = business.Id;
+                db.Set<WorkingDay>().Add(day);
+            }
         }
 
         if (request.PhoneNumbers is not null)
         {
             db.Set<PhoneNumber>().RemoveRange(business.PhoneNumbers);
-            await db.SaveChangesAsync(ct);
             var newNumbers = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers);
             foreach (var phone in newNumbers)
-                business.PhoneNumbers.Add(phone);
+            {
+                phone.BusinessId = business.Id;
+                db.Set<PhoneNumber>().Add(phone);
+            }
         }
 
         await db.SaveChangesAsync(ct);

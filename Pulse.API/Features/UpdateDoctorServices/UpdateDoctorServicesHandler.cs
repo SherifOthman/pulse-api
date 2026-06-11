@@ -61,11 +61,7 @@ public class UpdateDoctorServicesHandler(AppDbContext db)
             }
         }
 
-        if (newServices.Count > 0)
-        {
-            await db.SaveChangesAsync(ct);
-            resolvedIds.AddRange(newServices.Select(s => s.Id));
-        }
+        resolvedIds.AddRange(newServices.Select(s => s.Id));
 
         var toRemove = doctor.BusinessServices
             .Where(bs => !resolvedIds.Contains(bs.ServiceId)).ToList();
