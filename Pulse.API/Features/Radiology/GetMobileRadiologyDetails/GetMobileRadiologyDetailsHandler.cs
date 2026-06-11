@@ -26,7 +26,7 @@ public class GetMobileRadiologyDetailsHandler(AppDbContext db)
                 GovernorateName = x.City.Governorate.Name,
                 AvgRating    = x.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
                 TotalRatings = x.Testimonials.Count,
-                IsFavorite      = userId != null && db.UserFavorite.Any(f => f.UserId == userId.Value && f.BuissnessId == x.Id),
+                IsFavorite      = userId != null && db.UserFavorite.Any(f => f.UserId == userId.Value && f.BusinessId == x.Id),
                 HasUserReviewed = userId != null && x.Testimonials.Any(t => t.UserId == userId.Value),
                 WorkingDays  = x.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList(),
                 PhoneNumbers = x.PhoneNumbers.Select(p => new { p.Number, p.Type }).ToList(),
@@ -49,7 +49,7 @@ public class GetMobileRadiologyDetailsHandler(AppDbContext db)
 
         if (b is null) return null;
 
-        string? Abs(string? p) => ToAbsolute(p, request.BaseUrl);
+        string? Abs(string? p) => UrlHelper.ToAbsolute(p, request.BaseUrl);
 
         return new RadiologyMobileDetailsResponse(
             b.Id, b.Name, Abs(b.ProfileImageUrl), Abs(b.CoverImageUrl),
@@ -71,10 +71,4 @@ public class GetMobileRadiologyDetailsHandler(AppDbContext db)
         );
     }
 
-    private static string? ToAbsolute(string? path, string baseUrl)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return null;
-        if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
-        return $"{baseUrl}{(path.StartsWith('/') ? path : '/' + path)}";
-    }
 }

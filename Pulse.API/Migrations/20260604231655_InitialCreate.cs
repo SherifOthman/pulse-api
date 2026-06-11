@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -394,11 +394,11 @@ namespace Pulse.API.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BuissnessId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    BusinessId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserFavorite", x => new { x.UserId, x.BuissnessId });
+                    table.PrimaryKey("PK_UserFavorite", x => new { x.UserId, x.BusinessId });
                     table.ForeignKey(
                         name: "FK_UserFavorite_AspNetUsers_UserId",
                         column: x => x.UserId,
@@ -406,8 +406,8 @@ namespace Pulse.API.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserFavorite_Business_BuissnessId",
-                        column: x => x.BuissnessId,
+                        name: "FK_UserFavorite_Business_BusinessId",
+                        column: x => x.BusinessId,
                         principalTable: "Business",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -520,9 +520,9 @@ namespace Pulse.API.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserFavorite_BuissnessId",
+                name: "IX_UserFavorite_BusinessId",
                 table: "UserFavorite",
-                column: "BuissnessId");
+                column: "BusinessId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserFavorite_UserId",

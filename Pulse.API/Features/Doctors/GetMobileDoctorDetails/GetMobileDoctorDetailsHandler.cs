@@ -28,7 +28,7 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
                 x.Doctor.VisitPrice,
                 AvgRating       = x.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
                 TotalRatings    = x.Testimonials.Count,
-                IsFavorite      = userId != null && db.UserFavorite.Any(f => f.UserId == userId.Value && f.BuissnessId == x.Id),
+                IsFavorite      = userId != null && db.UserFavorite.Any(f => f.UserId == userId.Value && f.BusinessId == x.Id),
                 HasUserReviewed = userId != null && x.Testimonials.Any(t => t.UserId == userId.Value),
                 WorkingDays  = x.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList(),
                 PhoneNumbers = x.PhoneNumbers.Select(p => new { p.Number, p.Type }).ToList(),
@@ -51,7 +51,7 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
         if (b is null) return null;
 
         // Resolve relative paths to absolute URLs using the request base URL
-        string? Abs(string? path) => ToAbsolute(path, request.BaseUrl);
+        string? Abs(string? path) => UrlHelper.ToAbsolute(path, request.BaseUrl);
 
         return new DoctorMobileDetailsResponse(
             b.Id, b.Name, Abs(b.ProfileImageUrl), Abs(b.CoverImageUrl),
@@ -79,10 +79,4 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
         );
     }
 
-    private static string? ToAbsolute(string? path, string baseUrl)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return null;
-        if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
-        return $"{baseUrl}{(path.StartsWith('/') ? path : '/' + path)}";
-    }
 }

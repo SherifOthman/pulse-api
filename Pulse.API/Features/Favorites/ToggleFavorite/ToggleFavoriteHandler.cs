@@ -12,7 +12,7 @@ public class ToggleFavoriteHandler(AppDbContext db, ICurrentUser currentUser)
     public async Task Handle(ToggleFavoriteCommand request, CancellationToken ct)
     {
         var existing = await db.UserFavorite
-            .FirstOrDefaultAsync(f => f.UserId == currentUser.Id && f.BuissnessId == request.BusinessId, ct);
+            .FirstOrDefaultAsync(f => f.UserId == currentUser.Id && f.BusinessId == request.BusinessId, ct);
 
         if (existing is not null)
             db.UserFavorite.Remove(existing);
@@ -20,7 +20,7 @@ public class ToggleFavoriteHandler(AppDbContext db, ICurrentUser currentUser)
             db.UserFavorite.Add(new UserFavorite
             {
                 UserId = currentUser.Id,
-                BuissnessId = request.BusinessId
+                BusinessId = request.BusinessId
             });
 
         await db.SaveChangesAsync(ct);

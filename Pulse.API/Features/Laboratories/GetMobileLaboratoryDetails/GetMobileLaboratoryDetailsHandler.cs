@@ -26,7 +26,7 @@ public class GetMobileLaboratoryDetailsHandler(AppDbContext db)
                 GovernorateName = x.City.Governorate.Name,
                 AvgRating    = x.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
                 TotalRatings = x.Testimonials.Count,
-                IsFavorite      = userId != null && db.UserFavorite.Any(f => f.UserId == userId.Value && f.BuissnessId == x.Id),
+                IsFavorite      = userId != null && db.UserFavorite.Any(f => f.UserId == userId.Value && f.BusinessId == x.Id),
                 HasUserReviewed = userId != null && x.Testimonials.Any(t => t.UserId == userId.Value),
                 WorkingDays  = x.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList(),
                 PhoneNumbers = x.PhoneNumbers.Select(p => new { p.Number, p.Type }).ToList(),
@@ -49,32 +49,24 @@ public class GetMobileLaboratoryDetailsHandler(AppDbContext db)
 
         if (b is null) return null;
 
-        string? Abs(string? p) => ToAbsolute(p, request.BaseUrl);
-
         return new LaboratoryMobileDetailsResponse(
-            b.Id, b.Name, Abs(b.ProfileImageUrl), Abs(b.CoverImageUrl),
+            b.Id, b.Name, UrlHelper.ToAbsolute(b.ProfileImageUrl, request.BaseUrl), UrlHelper.ToAbsolute(b.CoverImageUrl, request.BaseUrl),
             b.Description, b.Address,
             b.GovernorateName, b.CityName, b.Latitude, b.Longitude,
             Math.Round(b.AvgRating, 1), b.TotalRatings, b.IsFavorite, b.HasUserReviewed,
             b.WorkingDays.Select(w => new WorkingDayDto((int)w.Day, w.StartTime.ToString("HH:mm"), w.EndTime.ToString("HH:mm"))).OrderBy(w => w.Day).ToList(),
             b.PhoneNumbers.Select(p => new PhoneNumberDto(p.Number, p.Type)).ToList(),
             b.Branches.Select(br => new BranchDto(
-                br.Id, br.Name, br.Address, Abs(br.ProfileImageUrl),
-                Abs(br.CoverImageUrl), br.Description,
+                br.Id, br.Name, br.Address, UrlHelper.ToAbsolute(br.ProfileImageUrl, request.BaseUrl),
+                UrlHelper.ToAbsolute(br.CoverImageUrl, request.BaseUrl), br.Description,
                 br.GovernorateName, br.CityName,
                 br.VisitPrice, br.Latitude, br.Longitude,
                 br.PhoneNumbers.Select(p => new PhoneNumberDto(p.Number, p.Type)).ToList(),
                 br.WorkingDays.Select(w => new WorkingDayDto((int)w.Day, w.StartTime.ToString("HH:mm"), w.EndTime.ToString("HH:mm"))).OrderBy(w => w.Day).ToList()
             )).ToList(),
-            b.Testimonials.Select(t => new TestimonialDto(t.Id, t.FullName, Abs(t.ImageUrl), t.Rating, t.Text, t.CreatedAt)).ToList(),
+            b.Testimonials.Select(t => new TestimonialDto(t.Id, t.FullName, UrlHelper.ToAbsolute(t.ImageUrl, request.BaseUrl), t.Rating, t.Text, t.CreatedAt)).ToList(),
             b.Services.Select(s => new ServiceDto(s)).ToList()
         );
     }
-
-    private static string? ToAbsolute(string? path, string baseUrl)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return null;
-        if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
-        return $"{baseUrl}{(path.StartsWith('/') ? path : '/' + path)}";
-    }
 }
+

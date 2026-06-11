@@ -42,11 +42,11 @@ app.UseAppExceptionMiddleware();
 
 app.UseStaticFiles();
 
-// Auto-apply migrations and create database on startup
+// Auto-apply pending migrations on startup
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
+    db.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.

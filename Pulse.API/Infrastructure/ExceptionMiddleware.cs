@@ -1,4 +1,3 @@
-using FluentValidation;
 using Pulse.API.Infrastructure.Exceptions;
 
 namespace Pulse.API.Infrastructure;
@@ -23,24 +22,35 @@ public class ExceptionMiddleware(RequestDelegate next)
             .GetRequiredService<IWebHostEnvironment>()
             .IsDevelopment();
 
-        var (statusCode, message) = ex switch
-        {
-            NotFoundException        => (404, ex.Message),
-            BadRequestException      => (400, ex.Message),
-            UnauthorizedException or
-                UnauthorizedAccessException => (401, ex.Message),
-            ForbiddenException       => (403, ex.Message),
-            ConflictException        => (409, ex.Message),
-            KeyNotFoundException     => (404, ex.Message),
-            ValidationException      => (400, string.Join(" | ",
-                ((ValidationException)ex).Errors.Select(e => e.ErrorMessage))),
-            _                        => (500, isDev
-                ? $"{ex.GetType().Name}: {ex.Message}\n{ex.InnerException?.Message}"
-                : "An unexpected error occurred")
-        };
+        int statusCode;
+        string message;
 
-        context.Response.StatusCode = statusCode;
-        context.Response.ContentType = "application/json";
+        switch (ex)
+        {
+            case NotFoundException:
+                statusCode = 404; message = ex.Message; break;
+            case BadRequestException:
+                statusCode = 400; message = ex.Message; break;
+            case UnauthorizedException:
+            case UnauthorizedAccessException:
+                statusCode = 401; message = ex.Message; break;
+            case ForbiddenException:
+                statusCode = 403; message = ex.Message; break;
+            case ConflictException:
+                statusCode = 409; message = ex.Message; break;
+            case KeyNotFoundException:
+                statusCode = 404; message = ex.Message; break;
+            default:
+                statusCode = 500;
+                message = isDev
+                    ? $"{ex.GetType().Name}: {ex.Message}" +
+                      (ex.InnerException != null ? $"\nInner: {ex.InnerException.Message}" : "")
+                    : "حدث خطأ غير متوقع في الخادم";
+                break;
+        }
+
+        context.Response.StatusCode      = statusCode;
+        context.Response.ContentType     = "application/json";
         await context.Response.WriteAsJsonAsync(new { error = message });
     }
 }

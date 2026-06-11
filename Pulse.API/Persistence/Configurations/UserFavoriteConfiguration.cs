@@ -10,7 +10,7 @@ public class UserFavoriteConfiguration : IEntityTypeConfiguration<UserFavorite>
     {
         builder.ToTable("UserFavorite");
 
-        builder.HasKey(x => new { x.UserId, x.BuissnessId });
+        builder.HasKey(x => new { x.UserId, x.BusinessId });
 
         builder.HasIndex(x => x.UserId);
     }

@@ -53,7 +53,7 @@ public class GetMobileRadiologyHandler(AppDbContext db)
                 && r.NextWorkingDay.EndTime >= now;
 
             return new RadiologyMobileListResponse(
-                r.Id, r.Name, ToAbsolute(r.ProfileImageUrl, request.BaseUrl),
+                r.Id, r.Name, UrlHelper.ToAbsolute(r.ProfileImageUrl, request.BaseUrl),
                 r.GovernorateName,
                 Math.Round(r.AvgRating, 1), r.TotalRatings,
                 r.NextWorkingDay != null ? (int)r.NextWorkingDay.Day : 0,
@@ -67,10 +67,5 @@ public class GetMobileRadiologyHandler(AppDbContext db)
             items, raw.Page, raw.PageSize, raw.TotalCount, raw.HasMore);
     }
 
-    private static string? ToAbsolute(string? path, string baseUrl)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return null;
-        if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
-        return $"{baseUrl}{(path.StartsWith('/') ? path : '/' + path)}";
-    }
 }
+

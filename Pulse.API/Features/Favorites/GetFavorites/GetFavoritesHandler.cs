@@ -14,15 +14,15 @@ public class GetFavoritesHandler(AppDbContext db, ICurrentUser currentUser)
             .AsNoTracking()
             .Where(f => f.UserId == currentUser.Id)
             .Select(f => new FavoriteListItemResponse(
-                f.BuissnessId,
-                f.Buissness.Name,
-                f.Buissness.ProfileImageUrl,
-                f.Buissness.Testimonials
+                f.BusinessId,
+                f.Business.Name,
+                f.Business.ProfileImageUrl,
+                f.Business.Testimonials
                     .Select(t => (double)t.Rating)
                     .DefaultIfEmpty()
                     .Average(),
-                f.Buissness.Testimonials.Count,
-                (int)f.Buissness.Type
+                f.Business.Testimonials.Count,
+                (int)f.Business.Type
             ))
             .ToListAsync(ct)
             .ContinueWith(t => t.Result

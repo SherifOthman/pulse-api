@@ -73,7 +73,7 @@ public class GetMobileDoctorsHandler(AppDbContext db)
                 && r.NextWorkingDay.StartTime <= now
                 && r.NextWorkingDay.EndTime   >= now;
 
-            var profileImageUrl = ToAbsolute(r.ProfileImageUrl, request.BaseUrl);
+            var profileImageUrl = UrlHelper.ToAbsolute(r.ProfileImageUrl, request.BaseUrl);
 
             return new DoctorMobileListResponse(
                 r.Id,
@@ -95,10 +95,5 @@ public class GetMobileDoctorsHandler(AppDbContext db)
             items, raw.Page, raw.PageSize, raw.TotalCount, raw.HasMore);
     }
 
-    private static string? ToAbsolute(string? path, string baseUrl)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return null;
-        if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
-        return $"{baseUrl}{(path.StartsWith('/') ? path : '/' + path)}";
-    }
 }
+

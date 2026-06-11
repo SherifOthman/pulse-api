@@ -3,9 +3,9 @@ using MediatR;
 
 namespace Pulse.API.Features.News.GetNewsCategories;
 
-public class GetNewsCategoriesHandler(INewsService newsService) : IRequestHandler<GetNewsCategoriesQuery, object>
+public class GetNewsCategoriesHandler(INewsService newsService) : IRequestHandler<GetNewsCategoriesQuery, List<string>>
 {
-    public async Task<object> Handle(GetNewsCategoriesQuery request, CancellationToken ct)
+    public async Task<List<string>> Handle(GetNewsCategoriesQuery request, CancellationToken ct)
     {
         return await newsService.GetCategoriesAsync();
     }

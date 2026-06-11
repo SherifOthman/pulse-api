@@ -28,7 +28,7 @@ public static class JWTAuthDep
                     ClockSkew = TimeSpan.Zero,
 
                     ValidIssuer = jwtOptions!.Issuer,
-                    ValidAudience = jwtOptions!.Adudience,
+                    ValidAudience = jwtOptions!.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtOptions.Key))
                 };

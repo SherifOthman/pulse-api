@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
+using Pulse.API.Features.Shared;
 
 namespace Pulse.API.Services;
 
@@ -34,7 +35,7 @@ public class NewsService : INewsService
 
     // ── Public API ──────────────────────────────────────────────────────────
 
-    public async Task<PaginatedNewsResponse> GetNewsAsync(
+    public async Task<PaginatedResponse<NewsArticleDto>> GetNewsAsync(
         int page = 1, int pageSize = 10,
         string? category = null, string? search = null,
         CancellationToken ct = default)
@@ -57,7 +58,7 @@ public class NewsService : INewsService
         var list  = filtered.OrderByDescending(a => a.PublishedAt).ToList();
         var items = list.Skip((page - 1) * pageSize).Take(pageSize).Select(Map).ToList();
 
-        return new PaginatedNewsResponse(items, page, pageSize, list.Count, page * pageSize < list.Count);
+        return new PaginatedResponse<NewsArticleDto>(items, page, pageSize, list.Count, page * pageSize < list.Count);
     }
 
     public async Task<List<string>> GetCategoriesAsync(CancellationToken ct = default)
@@ -235,3 +236,4 @@ public class NewsService : INewsService
         public string? Name { get; set; }
     }
 }
+
