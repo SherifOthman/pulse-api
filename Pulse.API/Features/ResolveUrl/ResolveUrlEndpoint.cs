@@ -17,13 +17,18 @@ public class ResolveUrlEndpoint : IEndpoint
 {
     private static readonly Regex AtRegex     = new(@"/@(-?\d+\.?\d*),(-?\d+\.?\d*)");
     private static readonly Regex DataRegex   = new(@"!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)");
+    // Dropped pin format: !8m2!3d29.97!4d31.28
+    private static readonly Regex Pin8mRegex  = new(@"!8m2!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)");
     private static readonly Regex CenterRegex = new(@"center=(-?\d+\.?\d*)(?:%2C|,)(-?\d+\.?\d*)", RegexOptions.IgnoreCase);
-    // Matches the place name segment in /maps/place/PLACE_NAME/
     private static readonly Regex PlaceNameRegex = new(@"/maps/place/([^/?]+)");
 
     private static (double lat, double lng)? TryExtract(string text)
     {
-        var m = DataRegex.Match(text);
+        // Dropped pin with !8m2!3d!4d is most precise
+        var m = Pin8mRegex.Match(text);
+        if (m.Success) return (double.Parse(m.Groups[1].Value), double.Parse(m.Groups[2].Value));
+        // Named place pin
+        m = DataRegex.Match(text);
         if (m.Success) return (double.Parse(m.Groups[1].Value), double.Parse(m.Groups[2].Value));
         m = AtRegex.Match(text);
         if (m.Success) return (double.Parse(m.Groups[1].Value), double.Parse(m.Groups[2].Value));
