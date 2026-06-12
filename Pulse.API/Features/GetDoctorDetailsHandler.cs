@@ -33,7 +33,8 @@ public class GetDoctorDetailsHandler(AppDbContext db)
                 Branches = x.Branches.Select(br => new
                 {
                     br.Id, br.ParentBusinessId, br.Name, br.Address,
-                    br.Latitude, br.Longitude, br.VisitPrice,
+                    br.Latitude, br.Longitude,
+                    VisitPrice      = br.DoctorBranchProfile != null ? br.DoctorBranchProfile.VisitPrice : null,
                     GovernorateName = br.City.Governorate.Name,
                     CityName        = br.City.Name,
                     PhoneNumbers    = br.PhoneNumbers.Select(p => new { p.Number, p.Type }).ToList(),
@@ -55,9 +56,7 @@ public class GetDoctorDetailsHandler(AppDbContext db)
             b.GovernorateName, b.GovernorateId, b.CityName, b.CityId,
             b.Latitude, b.Longitude,
             Math.Round(b.AvgRating, 1), b.TotalRatings, (int)b.Gender, b.VisitPrice,
-            b.WorkingDays
-                .Select(w => new WorkingDayDto((int)w.Day, w.StartTime.ToString("HH:mm"), w.EndTime.ToString("HH:mm")))
-                .OrderBy(w => w.Day).ToList(),
+            b.WorkingDays.Select(w => new WorkingDayDto((int)w.Day, w.StartTime.ToString("HH:mm"), w.EndTime.ToString("HH:mm"))).OrderBy(w => w.Day).ToList(),
             b.PhoneNumbers.Select(p => new PhoneNumberDto(p.Number, p.Type)).ToList(),
             b.Branches.Select(br =>
             {

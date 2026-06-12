@@ -16,6 +16,7 @@ public class UpdateBranchHandler(AppDbContext db)
         var branch = await db.Branches
             .Include(b => b.WorkingDays)
             .Include(b => b.PhoneNumbers)
+            .Include(b => b.DoctorBranchProfile)
             .FirstOrDefaultAsync(b =>
                 b.Id == request.Id &&
                 b.ParentBusiness.Type == BusinessType.Doctor, ct);
@@ -29,10 +30,20 @@ public class UpdateBranchHandler(AppDbContext db)
         if (request.CityId.HasValue)    branch.CityId    = request.CityId.Value;
         if (request.Latitude.HasValue)  branch.Latitude  = request.Latitude;
         if (request.Longitude.HasValue) branch.Longitude = request.Longitude;
-        if (request.VisitPrice.HasValue) branch.VisitPrice = request.VisitPrice;
 
         if (request.Address is not null)
             branch.Address = string.IsNullOrWhiteSpace(request.Address) ? null : request.Address.Trim();
+
+        // Update doctor-specific profile
+        if (request.VisitPrice.HasValue)
+        {
+            if (branch.DoctorBranchProfile is null)
+            {
+                branch.DoctorBranchProfile = new DoctorBranchProfile { BranchId = branch.Id };
+                db.DoctorBranchProfiles.Add(branch.DoctorBranchProfile);
+            }
+            branch.DoctorBranchProfile.VisitPrice = request.VisitPrice;
+        }
 
         if (request.WorkingDays is not null)
         {

@@ -22,9 +22,9 @@ public class GetBranchDetailsHandler(AppDbContext db)
                 GovernorateId   = x.City.Governorate.Id,
                 GovernorateName = x.City.Governorate.Name,
                 CityName        = x.City.Name,
-                x.VisitPrice,
-                WorkingDays  = x.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList(),
-                PhoneNumbers = x.PhoneNumbers.Select(p => new { p.Number, p.Type }).ToList(),
+                VisitPrice      = x.DoctorBranchProfile != null ? x.DoctorBranchProfile.VisitPrice : null,
+                WorkingDays     = x.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList(),
+                PhoneNumbers    = x.PhoneNumbers.Select(p => new { p.Number, p.Type }).ToList(),
             })
             .FirstOrDefaultAsync(ct);
 

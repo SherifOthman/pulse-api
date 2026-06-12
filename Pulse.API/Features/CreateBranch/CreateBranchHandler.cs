@@ -29,15 +29,18 @@ public class CreateBranchHandler(AppDbContext db, ICurrentUser currentUser)
 
         var branch = new Branch
         {
-            ParentBusinessId = request.DoctorId,
-            Name             = request.Name.Trim(),
-            CityId           = request.CityId ?? parent.CityId,
-            Address          = request.Address?.Trim(),
-            Latitude         = request.Latitude,
-            Longitude        = request.Longitude,
-            VisitPrice       = request.VisitPrice,
-            WorkingDays      = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays),
-            PhoneNumbers     = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers),
+            ParentBusinessId    = request.DoctorId,
+            Name                = request.Name.Trim(),
+            CityId              = request.CityId ?? parent.CityId,
+            Address             = request.Address?.Trim(),
+            Latitude            = request.Latitude,
+            Longitude           = request.Longitude,
+            WorkingDays         = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays),
+            PhoneNumbers        = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers),
+            DoctorBranchProfile = new DoctorBranchProfile
+            {
+                VisitPrice = request.VisitPrice,
+            },
         };
 
         db.Branches.Add(branch);

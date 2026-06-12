@@ -35,7 +35,8 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
                 Branches = x.Branches.Select(br => new
                 {
                     br.Id, br.ParentBusinessId, br.Name, br.Address,
-                    br.Latitude, br.Longitude, br.VisitPrice,
+                    br.Latitude, br.Longitude,
+                    VisitPrice      = br.DoctorBranchProfile != null ? br.DoctorBranchProfile.VisitPrice : null,
                     GovernorateName = br.City.Governorate.Name,
                     CityName        = br.City.Name,
                     PhoneNumbers    = br.PhoneNumbers.Select(p => new { p.Number, p.Type }).ToList(),
@@ -50,7 +51,6 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
         if (b is null) return null;
 
         string? Abs(string? path) => UrlHelper.ToAbsolute(path, request.BaseUrl);
-
         var today = DateTime.UtcNow.DayOfWeek;
         var now   = TimeOnly.FromDateTime(DateTime.UtcNow);
 

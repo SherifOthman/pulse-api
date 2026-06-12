@@ -1,6 +1,5 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Pulse.API.Domain.Enums;
 using Pulse.API.Features.Shared;
 using Pulse.API.Persistence;
 
@@ -22,7 +21,7 @@ public class GetBranchesHandler(AppDbContext db)
                 b.Id, b.Name,
                 Governorate = b.City.Governorate.Name,
                 City        = b.City.Name,
-                b.VisitPrice,
+                VisitPrice  = b.DoctorBranchProfile != null ? b.DoctorBranchProfile.VisitPrice : null,
                 WorkingDays = b.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList(),
             })
             .ToListAsync(ct);
@@ -34,10 +33,7 @@ public class GetBranchesHandler(AppDbContext db)
                 && todayRecord.StartTime <= now
                 && todayRecord.EndTime   >= now;
 
-            return new BranchListResponse(
-                b.Id, b.Name, null,
-                b.Governorate, b.City, b.VisitPrice, isOpen
-            );
+            return new BranchListResponse(b.Id, b.Name, null, b.Governorate, b.City, b.VisitPrice, isOpen);
         }).ToList();
     }
 }
