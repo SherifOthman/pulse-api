@@ -47,18 +47,17 @@ public class LoginEndpoints : IEndpoint
 
     internal static void AppendRefreshTokenCookie(HttpContext context, string token)
     {
-        // SameSite=None + Secure is required for cross-origin cookie access
-        // (dashboard on Vercel <-> API on runasp.net).
-        // With UseForwardedHeaders in place, context.Request.IsHttps reflects
-        // the actual scheme the client used, so Secure is set correctly in both
-        // prod (HTTPS) and local dev (HTTP — cookie still works same-origin).
-        var isHttps = context.Request.IsHttps;
-
+        // Always use SameSite=None + Secure=true.
+        // The dashboard (Vercel) and API (runasp.net) are on different domains,
+        // so cross-origin cookie rules apply. SameSite=None requires Secure=true.
+        // The API is always served over HTTPS in production (runasp.net terminates TLS),
+        // so Secure=true is always safe. In local dev the cookie works regardless
+        // because dashboard and API share the same origin (localhost).
         context.Response.Cookies.Append("refreshToken", token, new CookieOptions
         {
             HttpOnly = true,
-            SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
-            Secure   = isHttps,
+            SameSite = SameSiteMode.None,
+            Secure   = true,
             Path     = "/",
             Expires  = DateTime.UtcNow.AddDays(7)
         });
