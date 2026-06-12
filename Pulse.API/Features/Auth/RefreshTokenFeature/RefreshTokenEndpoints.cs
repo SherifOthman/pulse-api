@@ -1,5 +1,6 @@
 using Pulse.API.Features.Auth.RefreshToken;
 using MediatR;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Pulse.API.Features.Auth.RefreshTokenFeature;
 
@@ -7,7 +8,10 @@ public class RefreshTokenEndpoints : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/dashboard/auth/refresh", async (HttpContext context, IMediator mediator) =>
+        app.MapPost("/dashboard/auth/refresh", async (
+            HttpContext context,
+            IMediator mediator,
+            IWebHostEnvironment env) =>
         {
             var ip = context.Connection.RemoteIpAddress?.ToString();
 
@@ -19,14 +23,7 @@ public class RefreshTokenEndpoints : IEndpoint
                 var result = await mediator.Send(new RefreshTokenCommand(
                     string.Empty, refreshToken!, ip));
 
-                context.Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
-                {
-                    HttpOnly = true,
-                    SameSite = SameSiteMode.None,
-                    Secure = true,
-                    Path = "/",
-                    Expires = DateTime.UtcNow.AddDays(7)
-                });
+                context.Response.Cookies.Append("refreshToken", result.RefreshToken, BuildCookieOptions(env));
 
                 return Results.Ok(new { result.AccessToken, result.RefreshToken });
             }
@@ -36,7 +33,10 @@ public class RefreshTokenEndpoints : IEndpoint
             }
         });
 
-        app.MapPost("/mobile/auth/refresh", async (HttpContext context, IMediator mediator) =>
+        app.MapPost("/mobile/auth/refresh", async (
+            HttpContext context,
+            IMediator mediator,
+            IWebHostEnvironment env) =>
         {
             var ip = context.Connection.RemoteIpAddress?.ToString();
 
@@ -48,14 +48,7 @@ public class RefreshTokenEndpoints : IEndpoint
                 var result = await mediator.Send(new RefreshTokenCommand(
                     string.Empty, refreshToken!, ip));
 
-                context.Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
-                {
-                    HttpOnly = true,
-                    SameSite = SameSiteMode.None,
-                    Secure = true,
-                    Path = "/",
-                    Expires = DateTime.UtcNow.AddDays(7)
-                });
+                context.Response.Cookies.Append("refreshToken", result.RefreshToken, BuildCookieOptions(env));
 
                 return Results.Ok(new { result.AccessToken, result.RefreshToken });
             }
@@ -64,5 +57,18 @@ public class RefreshTokenEndpoints : IEndpoint
                 return Results.Unauthorized();
             }
         });
+    }
+
+    private static CookieOptions BuildCookieOptions(IWebHostEnvironment env)
+    {
+        var isProd = env.IsProduction();
+        return new CookieOptions
+        {
+            HttpOnly = true,
+            SameSite = isProd ? SameSiteMode.None : SameSiteMode.Lax,
+            Secure   = isProd,
+            Path     = "/",
+            Expires  = DateTime.UtcNow.AddDays(7)
+        };
     }
 }
