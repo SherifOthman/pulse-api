@@ -23,7 +23,7 @@ public class Branch : Entity
     /// <summary>
     /// Doctor-type branches only. The visit price for this specific location.
     /// Null for all other business types.
-    /// </summary>  
+    /// </summary>
     public decimal? VisitPrice { get; set; }
 
     // Per-branch contact and schedule

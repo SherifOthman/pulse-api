@@ -2,7 +2,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Pulse.API.Domain.Enums;
 using Pulse.API.Features.Shared;
-using Pulse.API.Infrastructure;
 using Pulse.API.Persistence;
 
 namespace Pulse.API.Features.Doctors.Branches.GetBranches;
@@ -36,7 +35,7 @@ public class GetBranchesHandler(AppDbContext db)
                 && todayRecord.EndTime   >= now;
 
             return new BranchListResponse(
-                b.Id, b.Name, null,  // no image on branches
+                b.Id, b.Name, null,
                 b.Governorate, b.City, b.VisitPrice, isOpen
             );
         }).ToList();
