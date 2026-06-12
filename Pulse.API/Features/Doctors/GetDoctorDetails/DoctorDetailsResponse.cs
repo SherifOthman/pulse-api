@@ -23,6 +23,7 @@ public record DoctorDetailsResponse(
     double AverageRating,
     int TotalRatings,
     int Gender,                   // 0=Male, 1=Female
+    decimal? VisitPrice,
     List<WorkingDayDto> WorkingDays,
     List<PhoneNumberDto> PhoneNumbers,
     List<BranchDto> Branches,

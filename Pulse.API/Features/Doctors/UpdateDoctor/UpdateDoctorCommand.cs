@@ -14,6 +14,8 @@ public record UpdateDoctorCommand(
     string? CoverImageUrl,
     Guid? SpecializationId,
     Gender? Gender,
+    decimal? VisitPrice,
+    bool ClearVisitPrice,
     double? Latitude,
     double? Longitude,
     List<WorkingDayDto>? WorkingDays,

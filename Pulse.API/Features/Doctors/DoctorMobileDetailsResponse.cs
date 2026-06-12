@@ -21,6 +21,7 @@ public record DoctorMobileDetailsResponse(
     int TotalRatings,
     bool IsFavorite,
     bool HasUserReviewed,
+    decimal? VisitPrice,
     List<WorkingDayDto> WorkingDays,
     List<PhoneNumberDto> PhoneNumbers,
     List<BranchDto> Branches,

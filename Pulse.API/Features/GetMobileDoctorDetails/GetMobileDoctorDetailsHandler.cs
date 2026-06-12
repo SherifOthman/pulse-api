@@ -29,6 +29,7 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
                 TotalRatings    = x.Testimonials.Count,
                 IsFavorite      = userId != null && db.UserFavorite.Any(f => f.UserId == userId.Value && f.BusinessId == x.Id),
                 HasUserReviewed = userId != null && x.Testimonials.Any(t => t.UserId == userId.Value),
+                VisitPrice      = x.DoctorProfile!.VisitPrice,
                 WorkingDays  = x.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList(),
                 PhoneNumbers = x.PhoneNumbers.Select(p => new { p.Number, p.Type }).ToList(),
                 Branches = x.Branches.Select(br => new
@@ -58,6 +59,7 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
             b.Description, b.Address, b.GovernorateName, b.CityName,
             b.Latitude, b.Longitude,
             Math.Round(b.AvgRating, 1), b.TotalRatings, b.IsFavorite, b.HasUserReviewed,
+            b.VisitPrice,
             b.WorkingDays.Select(w => new WorkingDayDto((int)w.Day, w.StartTime.ToString("HH:mm"), w.EndTime.ToString("HH:mm"))).OrderBy(w => w.Day).ToList(),
             b.PhoneNumbers.Select(p => new PhoneNumberDto(p.Number, p.Type)).ToList(),
             b.Branches.Select(br =>

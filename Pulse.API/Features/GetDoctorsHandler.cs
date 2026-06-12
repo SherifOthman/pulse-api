@@ -33,6 +33,7 @@ public class GetDoctorsHandler(AppDbContext db)
             GovernorateName    = b.City.Governorate.Name,
             AvgRating          = b.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
             b.DoctorProfile.Gender,
+            b.DoctorProfile.VisitPrice,
             CreatedBy          = b.CreatedByUser != null ? b.CreatedByUser.FullName : null,
         });
 
@@ -51,7 +52,7 @@ public class GetDoctorsHandler(AppDbContext db)
             r.Id, r.Name, r.ProfileImageUrl,
             r.SpecializationName, r.GovernorateName,
             Math.Round(r.AvgRating, 1),
-            (int)r.Gender, r.CreatedBy
+            (int)r.Gender, r.CreatedBy, r.VisitPrice
         )).ToList();
 
         return new PaginatedResponse<DoctorListResponse>(

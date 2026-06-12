@@ -45,6 +45,7 @@ public class CreateDoctorHandler(AppDbContext db, ICurrentUser currentUser)
             {
                 SpecializationId = request.SpecializationId ?? Guid.Empty,
                 Gender           = request.Gender ?? Gender.Male,
+                VisitPrice       = request.VisitPrice,
             },
             WorkingDays  = workingDays,
             PhoneNumbers = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers),

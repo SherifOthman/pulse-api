@@ -20,5 +20,9 @@ public class DoctorProfileConfiguration : IEntityTypeConfiguration<DoctorProfile
         builder.Property(x => x.Gender)
             .HasConversion<int>()
             .IsRequired();
+
+        builder.Property(x => x.VisitPrice)
+            .HasColumnType("decimal(18,2)")
+            .IsRequired(false);
     }
 }

@@ -4,7 +4,6 @@ namespace Pulse.API.Domain.Entities;
 
 /// <summary>
 /// Doctor-specific profile. Linked 1:1 to the parent Business via BusinessId (PK = FK).
-/// VisitPrice is per-branch (see Branch.VisitPrice), not stored here.
 /// </summary>
 public class DoctorProfile
 {
@@ -13,4 +12,10 @@ public class DoctorProfile
     public Guid SpecializationId { get; set; }
     public Specialization Specialization { get; set; } = null!;
     public Gender Gender { get; set; }
+
+    /// <summary>
+    /// Default visit price for the main/only location.
+    /// Each branch can override this with its own VisitPrice.
+    /// </summary>
+    public decimal? VisitPrice { get; set; }
 }

@@ -37,6 +37,7 @@ public class GetMobileDoctorsHandler(AppDbContext db)
             GovernorateName    = b.City.Governorate.Name,
             AvgRating          = b.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
             TotalRatings       = b.Testimonials.Count,
+            VisitPrice         = b.DoctorProfile!.VisitPrice,
             NextWorkingDay     = b.WorkingDays
                 .Select(w => new
                 {
@@ -72,7 +73,7 @@ public class GetMobileDoctorsHandler(AppDbContext db)
                 r.NextWorkingDay is not null ? (int)r.NextWorkingDay.Day : 0,
                 r.NextWorkingDay?.StartTime.ToString("HH:mm"),
                 r.NextWorkingDay?.EndTime.ToString("HH:mm"),
-                isOpen, r.SpecializationName
+                isOpen, r.SpecializationName, r.VisitPrice
             );
         }).ToList();
 

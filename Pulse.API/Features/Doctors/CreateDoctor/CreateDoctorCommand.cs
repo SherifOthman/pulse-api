@@ -13,6 +13,7 @@ public record CreateDoctorCommand(
     string? CoverImageUrl,
     Guid? SpecializationId,
     Gender? Gender,
+    decimal? VisitPrice,
     double? Latitude,
     double? Longitude,
     List<WorkingDayDto>? WorkingDays,

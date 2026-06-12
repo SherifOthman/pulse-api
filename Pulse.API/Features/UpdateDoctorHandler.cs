@@ -57,6 +57,11 @@ public class UpdateDoctorHandler(AppDbContext db)
             }
 
             if (request.Gender.HasValue) business.DoctorProfile.Gender = request.Gender.Value;
+
+            if (request.ClearVisitPrice)
+                business.DoctorProfile.VisitPrice = null;
+            else if (request.VisitPrice.HasValue)
+                business.DoctorProfile.VisitPrice = request.VisitPrice.Value;
         }
 
         if (request.WorkingDays is not null)

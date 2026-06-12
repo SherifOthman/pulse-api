@@ -11,5 +11,6 @@ public record DoctorMobileListResponse(
     string? StartTime,
     string? EndTime,
     bool IsOpen,
-    string Specialization
+    string Specialization,
+    decimal? VisitPrice
 );

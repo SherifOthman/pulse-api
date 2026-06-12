@@ -25,6 +25,7 @@ public class GetDoctorDetailsHandler(AppDbContext db)
                 SpecializationId   = x.DoctorProfile!.SpecializationId,
                 SpecializationName = x.DoctorProfile!.Specialization.Name,
                 x.DoctorProfile.Gender,
+                x.DoctorProfile.VisitPrice,
                 AvgRating    = x.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
                 TotalRatings = x.Testimonials.Count,
                 WorkingDays  = x.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList(),
@@ -53,7 +54,7 @@ public class GetDoctorDetailsHandler(AppDbContext db)
             b.Id, b.Name, b.ProfileImageUrl, b.CoverImageUrl, b.Description, b.Address,
             b.GovernorateName, b.GovernorateId, b.CityName, b.CityId,
             b.Latitude, b.Longitude,
-            Math.Round(b.AvgRating, 1), b.TotalRatings, (int)b.Gender,
+            Math.Round(b.AvgRating, 1), b.TotalRatings, (int)b.Gender, b.VisitPrice,
             b.WorkingDays
                 .Select(w => new WorkingDayDto((int)w.Day, w.StartTime.ToString("HH:mm"), w.EndTime.ToString("HH:mm")))
                 .OrderBy(w => w.Day).ToList(),
