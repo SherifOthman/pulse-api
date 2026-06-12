@@ -19,6 +19,8 @@ public class CreateLaboratoryHandler(AppDbContext db, ICurrentUser currentUser)
             BusinessType.Laboratory, currentUser.Id, ct);
 
         business.LaboratoryProfile = new LaboratoryProfile();
+        business.WorkingDays       = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays);
+        business.PhoneNumbers      = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers);
 
         db.Businesses.Add(business);
         await db.SaveChangesAsync(ct);

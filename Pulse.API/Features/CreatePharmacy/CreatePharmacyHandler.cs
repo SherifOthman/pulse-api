@@ -27,6 +27,8 @@ public class CreatePharmacyHandler(AppDbContext db, ICurrentUser currentUser)
             ct);
 
         business.PharmacyProfile = new PharmacyProfile();
+        business.WorkingDays     = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays);
+        business.PhoneNumbers    = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers);
 
         db.Businesses.Add(business);
         await db.SaveChangesAsync(ct);

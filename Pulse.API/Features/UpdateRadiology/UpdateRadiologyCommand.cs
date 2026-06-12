@@ -1,4 +1,5 @@
 using MediatR;
+using Pulse.API.Features.Shared;
 
 namespace Pulse.API.Features.Radiology.UpdateRadiology;
 
@@ -11,5 +12,7 @@ public record UpdateRadiologyCommand(
     string? ProfileImageUrl,
     string? CoverImageUrl,
     double? Latitude,
-    double? Longitude
+    double? Longitude,
+    List<WorkingDayDto>? WorkingDays = null,
+    List<PhoneNumberDto>? PhoneNumbers = null
 ) : IRequest<RadiologyResponse>;

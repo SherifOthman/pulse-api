@@ -1,8 +1,7 @@
 using MediatR;
+using Pulse.API.Features.Shared;
 
 namespace Pulse.API.Features.Pharmacies.CreatePharmacy;
-
-using Pulse.API.Features.Shared;
 
 public record CreatePharmacyCommand(
     string Name,
@@ -13,5 +12,7 @@ public record CreatePharmacyCommand(
     string? CoverImageUrl,
     double? Latitude,
     double? Longitude,
+    List<WorkingDayDto>? WorkingDays = null,
+    List<PhoneNumberDto>? PhoneNumbers = null,
     List<BusinessServiceItem>? Services = null
 ) : IRequest<PharmacyResponse>;

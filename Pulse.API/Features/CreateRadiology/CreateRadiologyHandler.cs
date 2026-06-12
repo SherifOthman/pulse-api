@@ -19,6 +19,8 @@ public class CreateRadiologyHandler(AppDbContext db, ICurrentUser currentUser)
             BusinessType.Radiology, currentUser.Id, ct);
 
         business.RadiologyProfile = new RadiologyProfile();
+        business.WorkingDays      = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays);
+        business.PhoneNumbers     = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers);
 
         db.Businesses.Add(business);
         await db.SaveChangesAsync(ct);
