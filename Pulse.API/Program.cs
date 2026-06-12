@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using Pulse.API.DependencyInjections;
 using Pulse.API.Infrastructure;
 using Pulse.API.Persistence;
@@ -24,7 +25,18 @@ builder.Services.AddJWTAuth(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddNewsServices(builder.Configuration);
 
-// CORS for mobile dev
+// Trust the reverse proxy (runasp.net, etc.) so X-Forwarded-Proto is respected.
+// This is required for UseHttpsRedirection and Secure cookies to work correctly
+// when Kestrel sits behind an HTTPS-terminating proxy.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Trust all proxies — safe for runasp.net shared hosting where we can't whitelist IPs
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+// CORS — allow the dashboard origin and mobile
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -37,6 +49,9 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// MUST be first — so all subsequent middleware sees the correct scheme/host
+app.UseForwardedHeaders();
 
 app.UseAppExceptionMiddleware();
 

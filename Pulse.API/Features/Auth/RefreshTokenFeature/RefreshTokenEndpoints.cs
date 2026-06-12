@@ -1,6 +1,6 @@
+using Pulse.API.Features.Auth.Login;
 using Pulse.API.Features.Auth.RefreshToken;
 using MediatR;
-using Microsoft.AspNetCore.Hosting;
 
 namespace Pulse.API.Features.Auth.RefreshTokenFeature;
 
@@ -10,8 +10,7 @@ public class RefreshTokenEndpoints : IEndpoint
     {
         app.MapPost("/dashboard/auth/refresh", async (
             HttpContext context,
-            IMediator mediator,
-            IWebHostEnvironment env) =>
+            IMediator mediator) =>
         {
             var ip = context.Connection.RemoteIpAddress?.ToString();
 
@@ -23,8 +22,7 @@ public class RefreshTokenEndpoints : IEndpoint
                 var result = await mediator.Send(new RefreshTokenCommand(
                     string.Empty, refreshToken!, ip));
 
-                context.Response.Cookies.Append("refreshToken", result.RefreshToken, BuildCookieOptions(env));
-
+                LoginEndpoints.AppendRefreshTokenCookie(context, result.RefreshToken);
                 return Results.Ok(new { result.AccessToken, result.RefreshToken });
             }
             catch
@@ -35,8 +33,7 @@ public class RefreshTokenEndpoints : IEndpoint
 
         app.MapPost("/mobile/auth/refresh", async (
             HttpContext context,
-            IMediator mediator,
-            IWebHostEnvironment env) =>
+            IMediator mediator) =>
         {
             var ip = context.Connection.RemoteIpAddress?.ToString();
 
@@ -48,8 +45,7 @@ public class RefreshTokenEndpoints : IEndpoint
                 var result = await mediator.Send(new RefreshTokenCommand(
                     string.Empty, refreshToken!, ip));
 
-                context.Response.Cookies.Append("refreshToken", result.RefreshToken, BuildCookieOptions(env));
-
+                LoginEndpoints.AppendRefreshTokenCookie(context, result.RefreshToken);
                 return Results.Ok(new { result.AccessToken, result.RefreshToken });
             }
             catch
@@ -57,18 +53,5 @@ public class RefreshTokenEndpoints : IEndpoint
                 return Results.Unauthorized();
             }
         });
-    }
-
-    private static CookieOptions BuildCookieOptions(IWebHostEnvironment env)
-    {
-        var isProd = env.IsProduction();
-        return new CookieOptions
-        {
-            HttpOnly = true,
-            SameSite = isProd ? SameSiteMode.None : SameSiteMode.Lax,
-            Secure   = isProd,
-            Path     = "/",
-            Expires  = DateTime.UtcNow.AddDays(7)
-        };
     }
 }
