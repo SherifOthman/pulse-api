@@ -31,8 +31,7 @@ public class GetDoctorsHandler(AppDbContext db)
             b.Name,
             b.ProfileImageUrl,
             SpecializationNames = b.DoctorProfile!.DoctorSpecializations
-                .Select(ds => ds.Specialization.Name)
-                .ToList(),
+                .Select(ds => ds.Specialization.Name),
             GovernorateName = b.City.Governorate.Name,
             AvgRating       = b.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
             b.DoctorProfile.Gender,

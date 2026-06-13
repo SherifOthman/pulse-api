@@ -25,8 +25,7 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
                 CityName           = x.City.Name,
                 GovernorateName    = x.City.Governorate.Name,
                 Specializations = x.DoctorProfile!.DoctorSpecializations
-                    .Select(ds => ds.Specialization.Name)
-                    .ToList(),
+                    .Select(ds => ds.Specialization.Name),
                 AvgRating       = x.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
                 TotalRatings    = x.Testimonials.Count,
                 IsFavorite      = userId != null && db.UserFavorite.Any(f => f.UserId == userId.Value && f.BusinessId == x.Id),

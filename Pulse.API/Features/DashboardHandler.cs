@@ -38,12 +38,12 @@ public class DashboardHandler(AppDbContext db) : IRequestHandler<DashboardQuery,
             .Select(b => new
             {
                 b.Id, b.Name, b.ProfileImageUrl,
-                Specialization = string.Join("، ", b.DoctorProfile!.DoctorSpecializations
-                    .Select(ds => ds.Specialization.Name)),
-                Governorate    = b.City.Governorate.Name,
-                AvgRating      = b.Testimonials.Average(t => (double)t.Rating),
-                TotalRatings   = b.Testimonials.Count,
-                VisitPrice     = b.DoctorProfile!.VisitPrice,
+                SpecializationNames = b.DoctorProfile!.DoctorSpecializations
+                    .Select(ds => ds.Specialization.Name),
+                Governorate  = b.City.Governorate.Name,
+                AvgRating    = b.Testimonials.Average(t => (double)t.Rating),
+                TotalRatings = b.Testimonials.Count,
+                VisitPrice   = b.DoctorProfile!.VisitPrice,
             })
             .OrderByDescending(x => x.AvgRating)
             .ThenByDescending(x => x.TotalRatings)
@@ -59,11 +59,11 @@ public class DashboardHandler(AppDbContext db) : IRequestHandler<DashboardQuery,
             .Select(b => new
             {
                 b.Id, b.Name, b.ProfileImageUrl,
-                Specialization = string.Join("، ", b.DoctorProfile!.DoctorSpecializations
-                    .Select(ds => ds.Specialization.Name)),
-                Governorate    = b.City.Governorate.Name,
+                SpecializationNames = b.DoctorProfile!.DoctorSpecializations
+                    .Select(ds => ds.Specialization.Name),
+                Governorate = b.City.Governorate.Name,
                 b.DoctorProfile.Gender,
-                VisitPrice     = b.DoctorProfile!.VisitPrice,
+                VisitPrice  = b.DoctorProfile!.VisitPrice,
             })
             .ToListAsync(ct);
 
@@ -92,13 +92,13 @@ public class DashboardHandler(AppDbContext db) : IRequestHandler<DashboardQuery,
 
             topDoctors.Select(d => new TopDoctorDto(
                 d.Id, d.Name, d.ProfileImageUrl,
-                d.Specialization, d.Governorate,
+                string.Join("، ", d.SpecializationNames), d.Governorate,
                 Math.Round(d.AvgRating, 1), d.TotalRatings, d.VisitPrice
             )).ToList(),
 
             recentDoctors.Select(d => new RecentDoctorDto(
                 d.Id, d.Name, d.ProfileImageUrl,
-                d.Specialization, d.Governorate,
+                string.Join("، ", d.SpecializationNames), d.Governorate,
                 d.VisitPrice, (int)d.Gender
             )).ToList(),
 

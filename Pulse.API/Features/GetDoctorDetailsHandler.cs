@@ -23,8 +23,7 @@ public class GetDoctorDetailsHandler(AppDbContext db)
                 CityName        = x.City.Name,
                 GovernorateName = x.City.Governorate.Name,
                 Specializations = x.DoctorProfile!.DoctorSpecializations
-                    .Select(ds => new { ds.SpecializationId, ds.Specialization.Name })
-                    .ToList(),
+                    .Select(ds => new { ds.SpecializationId, ds.Specialization.Name }),
                 x.DoctorProfile.Gender,
                 x.DoctorProfile.VisitPrice,
                 AvgRating    = x.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
