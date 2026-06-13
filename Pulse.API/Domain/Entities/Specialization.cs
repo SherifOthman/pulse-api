@@ -4,5 +4,5 @@ public class Specialization : Entity
 {
     public string Name { get; set; } = null!;
 
-    public ICollection<DoctorSpecialization> DoctorSpecializations { get; set; } = new List<DoctorSpecialization>();
+    public List<DoctorProfile> Doctors { get; set; } = new();
 }

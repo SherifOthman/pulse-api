@@ -26,14 +26,14 @@ public class GetMobileDoctorsHandler(AppDbContext db)
             query = query.Where(b => b.DoctorProfile!.Gender == request.Gender.Value);
 
         if (request.SpecializationId.HasValue)
-            query = query.Where(b => b.DoctorProfile!.DoctorSpecializations
-                .Any(ds => ds.SpecializationId == request.SpecializationId.Value));
+            query = query.Where(b => b.DoctorProfile!.SpecializationId == request.SpecializationId.Value);
 
         var projected = query.Select(b => new
         {
             b.Id,
             b.Name,
             b.ProfileImageUrl,
+            SpecializationName = b.DoctorProfile!.Specialization.Name,
             GovernorateName    = b.City.Governorate.Name,
             AvgRating          = b.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
             TotalRatings       = b.Testimonials.Count,
@@ -59,18 +59,6 @@ public class GetMobileDoctorsHandler(AppDbContext db)
 
         var raw = await projected.ToPaginatedAsync(bq.Page, bq.PageSize, ct);
 
-        // Load specializations for this page in one query
-        var doctorIds = raw.Items.Select(r => r.Id).ToList();
-        var specsByDoctor = await db.DoctorSpecializations
-            .AsNoTracking()
-            .Where(ds => doctorIds.Contains(ds.DoctorProfileId))
-            .Select(ds => new { ds.DoctorProfileId, ds.Specialization.Name })
-            .ToListAsync(ct);
-
-        var specMap = specsByDoctor
-            .GroupBy(x => x.DoctorProfileId)
-            .ToDictionary(g => g.Key, g => string.Join("، ", g.Select(x => x.Name)));
-
         var items = raw.Items.Select(r =>
         {
             var isOpen = r.NextWorkingDay is not null
@@ -85,9 +73,7 @@ public class GetMobileDoctorsHandler(AppDbContext db)
                 r.NextWorkingDay is not null ? (int)r.NextWorkingDay.Day : 0,
                 r.NextWorkingDay?.StartTime.ToString("HH:mm"),
                 r.NextWorkingDay?.EndTime.ToString("HH:mm"),
-                isOpen,
-                specMap.TryGetValue(r.Id, out var spec) ? spec : "",
-                r.VisitPrice
+                isOpen, r.SpecializationName, r.VisitPrice
             );
         }).ToList();
 

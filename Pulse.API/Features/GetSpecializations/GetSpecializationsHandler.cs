@@ -16,7 +16,8 @@ public class GetSpecializationsHandler(AppDbContext db)
         if (request.BusinessType.HasValue && Enum.IsDefined(typeof(BusinessType), request.BusinessType.Value))
         {
             var type = (BusinessType)request.BusinessType.Value;
-            query = query.Where(s => s.DoctorSpecializations.Any(ds => ds.DoctorProfile.Business.Type == type));
+            // DoctorProfile.Business is the parent business — no ParentBusinessId anymore
+            query = query.Where(s => s.Doctors.Any(d => d.Business.Type == type));
         }
 
         return await query

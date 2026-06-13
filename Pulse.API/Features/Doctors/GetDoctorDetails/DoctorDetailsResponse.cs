@@ -29,6 +29,6 @@ public record DoctorDetailsResponse(
     List<BranchDto> Branches,
     List<TestimonialDto> Testimonials,
     List<ServiceDto> Services,
-    List<Guid> SpecializationIds,
-    List<string> Specializations
+    Guid SpecializationId,
+    string Specialization
 );

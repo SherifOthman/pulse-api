@@ -22,19 +22,19 @@ public class GetDoctorsHandler(AppDbContext db)
             query = query.Where(b => b.DoctorProfile!.Gender == request.Gender.Value);
 
         if (request.SpecializationId.HasValue)
-            query = query.Where(b => b.DoctorProfile!.DoctorSpecializations
-                .Any(ds => ds.SpecializationId == request.SpecializationId.Value));
+            query = query.Where(b => b.DoctorProfile!.SpecializationId == request.SpecializationId.Value);
 
         var projected = query.Select(b => new
         {
             b.Id,
             b.Name,
             b.ProfileImageUrl,
-            GovernorateName = b.City.Governorate.Name,
-            AvgRating       = b.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
-            b.DoctorProfile!.Gender,
-            b.DoctorProfile!.VisitPrice,
-            CreatedBy = b.CreatedByUser != null ? b.CreatedByUser.FullName : null,
+            SpecializationName = b.DoctorProfile!.Specialization.Name,
+            GovernorateName    = b.City.Governorate.Name,
+            AvgRating          = b.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
+            b.DoctorProfile.Gender,
+            b.DoctorProfile.VisitPrice,
+            CreatedBy          = b.CreatedByUser != null ? b.CreatedByUser.FullName : null,
         });
 
         var desc = bq.SortDirection?.ToLower() == "desc";
@@ -48,22 +48,9 @@ public class GetDoctorsHandler(AppDbContext db)
 
         var raw = await projected.ToPaginatedAsync(bq.Page, bq.PageSize, ct);
 
-        // Load specializations for this page of doctors in one query
-        var doctorIds = raw.Items.Select(r => r.Id).ToList();
-        var specializationsByDoctor = await db.DoctorSpecializations
-            .AsNoTracking()
-            .Where(ds => doctorIds.Contains(ds.DoctorProfileId))
-            .Select(ds => new { ds.DoctorProfileId, ds.Specialization.Name })
-            .ToListAsync(ct);
-
-        var specMap = specializationsByDoctor
-            .GroupBy(x => x.DoctorProfileId)
-            .ToDictionary(g => g.Key, g => string.Join("، ", g.Select(x => x.Name)));
-
         var items = raw.Items.Select(r => new DoctorListResponse(
             r.Id, r.Name, r.ProfileImageUrl,
-            specMap.TryGetValue(r.Id, out var spec) ? spec : "",
-            r.GovernorateName,
+            r.SpecializationName, r.GovernorateName,
             Math.Round(r.AvgRating, 1),
             (int)r.Gender, r.CreatedBy, r.VisitPrice
         )).ToList();

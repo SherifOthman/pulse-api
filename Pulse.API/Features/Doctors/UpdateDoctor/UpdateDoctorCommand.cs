@@ -12,7 +12,7 @@ public record UpdateDoctorCommand(
     string? Description,
     string? ProfileImageUrl,
     string? CoverImageUrl,
-    List<Guid>? SpecializationIds,
+    Guid? SpecializationId,
     Gender? Gender,
     decimal? VisitPrice,
     bool ClearVisitPrice,

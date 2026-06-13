@@ -9,8 +9,8 @@ public class DoctorProfile
 {
     public Guid BusinessId { get; set; }
     public Business Business { get; set; } = null!;
-
-    /// <summary>Legacy single specialization — kept for mobile backward-compat, derived at query time.</summary>
+    public Guid SpecializationId { get; set; }
+    public Specialization Specialization { get; set; } = null!;
     public Gender Gender { get; set; }
 
     /// <summary>
@@ -18,6 +18,4 @@ public class DoctorProfile
     /// Each branch can override this with its own VisitPrice.
     /// </summary>
     public decimal? VisitPrice { get; set; }
-
-    public ICollection<DoctorSpecialization> DoctorSpecializations { get; set; } = new List<DoctorSpecialization>();
 }

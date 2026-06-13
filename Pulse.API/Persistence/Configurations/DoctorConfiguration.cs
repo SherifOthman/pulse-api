@@ -12,6 +12,11 @@ public class DoctorProfileConfiguration : IEntityTypeConfiguration<DoctorProfile
 
         builder.HasKey(x => x.BusinessId);
 
+        builder.HasOne(x => x.Specialization)
+            .WithMany(x => x.Doctors)
+            .HasForeignKey(x => x.SpecializationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Property(x => x.Gender)
             .HasConversion<int>()
             .IsRequired();
@@ -19,25 +24,5 @@ public class DoctorProfileConfiguration : IEntityTypeConfiguration<DoctorProfile
         builder.Property(x => x.VisitPrice)
             .HasColumnType("decimal(18,2)")
             .IsRequired(false);
-
-        builder.HasMany(x => x.DoctorSpecializations)
-            .WithOne(x => x.DoctorProfile)
-            .HasForeignKey(x => x.DoctorProfileId)
-            .OnDelete(DeleteBehavior.Cascade);
-    }
-}
-
-public class DoctorSpecializationConfiguration : IEntityTypeConfiguration<DoctorSpecialization>
-{
-    public void Configure(EntityTypeBuilder<DoctorSpecialization> builder)
-    {
-        builder.ToTable("DoctorSpecializations");
-
-        builder.HasKey(x => new { x.DoctorProfileId, x.SpecializationId });
-
-        builder.HasOne(x => x.Specialization)
-            .WithMany(x => x.DoctorSpecializations)
-            .HasForeignKey(x => x.SpecializationId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

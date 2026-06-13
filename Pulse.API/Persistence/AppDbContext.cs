@@ -10,7 +10,6 @@ namespace Pulse.API.Persistence
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<Business> Businesses => Set<Business>();
         public DbSet<Branch> Branches => Set<Branch>();
-        public DbSet<DoctorSpecialization> DoctorSpecializations => Set<DoctorSpecialization>();
         public DbSet<DoctorBranchProfile> DoctorBranchProfiles => Set<DoctorBranchProfile>();
         public DbSet<UserFavorite> UserFavorite => Set<UserFavorite>();
         public DbSet<Testimonial> Testimonials => Set<Testimonial>();

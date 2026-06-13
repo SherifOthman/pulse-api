@@ -38,10 +38,11 @@ public class DashboardHandler(AppDbContext db) : IRequestHandler<DashboardQuery,
             .Select(b => new
             {
                 b.Id, b.Name, b.ProfileImageUrl,
-                Governorate  = b.City.Governorate.Name,
-                AvgRating    = b.Testimonials.Average(t => (double)t.Rating),
-                TotalRatings = b.Testimonials.Count,
-                VisitPrice   = b.DoctorProfile!.VisitPrice,
+                Specialization = b.DoctorProfile!.Specialization.Name,
+                Governorate    = b.City.Governorate.Name,
+                AvgRating      = b.Testimonials.Average(t => (double)t.Rating),
+                TotalRatings   = b.Testimonials.Count,
+                VisitPrice     = b.DoctorProfile!.VisitPrice,
             })
             .OrderByDescending(x => x.AvgRating)
             .ThenByDescending(x => x.TotalRatings)
@@ -57,29 +58,18 @@ public class DashboardHandler(AppDbContext db) : IRequestHandler<DashboardQuery,
             .Select(b => new
             {
                 b.Id, b.Name, b.ProfileImageUrl,
-                Governorate = b.City.Governorate.Name,
-                b.DoctorProfile!.Gender,
-                VisitPrice  = b.DoctorProfile!.VisitPrice,
+                Specialization = b.DoctorProfile!.Specialization.Name,
+                Governorate    = b.City.Governorate.Name,
+                b.DoctorProfile.Gender,
+                VisitPrice     = b.DoctorProfile!.VisitPrice,
             })
             .ToListAsync(ct);
 
-        // Load specializations for both sets in one query
-        var dashboardDoctorIds = topDoctors.Select(d => d.Id)
-            .Concat(recentDoctors.Select(d => d.Id))
-            .Distinct().ToList();
-
-        var dashboardSpecMap = (await db.DoctorSpecializations
-            .AsNoTracking()
-            .Where(ds => dashboardDoctorIds.Contains(ds.DoctorProfileId))
-            .Select(ds => new { ds.DoctorProfileId, ds.Specialization.Name })
-            .ToListAsync(ct))
-            .GroupBy(x => x.DoctorProfileId)
-            .ToDictionary(g => g.Key, g => string.Join("، ", g.Select(x => x.Name)));
-
         // ── Specialization distribution (top 8) ───────────────────────────────
-        var specializationStats = await db.DoctorSpecializations
+        var specializationStats = await db.Businesses
             .AsNoTracking()
-            .GroupBy(ds => ds.Specialization.Name)
+            .Where(b => b.Type == BusinessType.Doctor)
+            .GroupBy(b => b.DoctorProfile!.Specialization.Name)
             .Select(g => new { Name = g.Key, Count = g.Count() })
             .OrderByDescending(x => x.Count)
             .Take(8)
@@ -101,15 +91,13 @@ public class DashboardHandler(AppDbContext db) : IRequestHandler<DashboardQuery,
 
             topDoctors.Select(d => new TopDoctorDto(
                 d.Id, d.Name, d.ProfileImageUrl,
-                dashboardSpecMap.TryGetValue(d.Id, out var ts) ? ts : "",
-                d.Governorate,
+                d.Specialization, d.Governorate,
                 Math.Round(d.AvgRating, 1), d.TotalRatings, d.VisitPrice
             )).ToList(),
 
             recentDoctors.Select(d => new RecentDoctorDto(
                 d.Id, d.Name, d.ProfileImageUrl,
-                dashboardSpecMap.TryGetValue(d.Id, out var rs) ? rs : "",
-                d.Governorate,
+                d.Specialization, d.Governorate,
                 d.VisitPrice, (int)d.Gender
             )).ToList(),
 
