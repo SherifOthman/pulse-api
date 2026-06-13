@@ -11,99 +11,95 @@ namespace Pulse.API.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // 1. Create the new join table
-            migrationBuilder.CreateTable(
-                name: "DoctorSpecializations",
-                columns: table => new
-                {
-                    DoctorProfileId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SpecializationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DoctorSpecializations", x => new { x.DoctorProfileId, x.SpecializationId });
-                    table.ForeignKey(
-                        name: "FK_DoctorSpecializations_DoctorProfiles_DoctorProfileId",
-                        column: x => x.DoctorProfileId,
-                        principalTable: "DoctorProfiles",
-                        principalColumn: "BusinessId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_DoctorSpecializations_Specializations_SpecializationId",
-                        column: x => x.SpecializationId,
-                        principalTable: "Specializations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DoctorSpecializations_SpecializationId",
-                table: "DoctorSpecializations",
-                column: "SpecializationId");
-
-            // 2. Migrate existing data: copy SpecializationId from DoctorProfiles into the join table
-            //    Only copy rows where SpecializationId is not the empty GUID (doctors that had no specialization)
+            // 1. Create the join table only if it doesn't already exist
             migrationBuilder.Sql(@"
-                INSERT INTO DoctorSpecializations (DoctorProfileId, SpecializationId)
-                SELECT dp.BusinessId, dp.SpecializationId
-                FROM DoctorProfiles dp
-                WHERE dp.SpecializationId != '00000000-0000-0000-0000-000000000000'
-                  AND EXISTS (
-                      SELECT 1 FROM Specializations s WHERE s.Id = dp.SpecializationId
-                  )
+                IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'DoctorSpecializations')
+                BEGIN
+                    CREATE TABLE [DoctorSpecializations] (
+                        [DoctorProfileId] uniqueidentifier NOT NULL,
+                        [SpecializationId] uniqueidentifier NOT NULL,
+                        CONSTRAINT [PK_DoctorSpecializations] PRIMARY KEY ([DoctorProfileId], [SpecializationId]),
+                        CONSTRAINT [FK_DoctorSpecializations_DoctorProfiles_DoctorProfileId]
+                            FOREIGN KEY ([DoctorProfileId]) REFERENCES [DoctorProfiles] ([BusinessId]) ON DELETE CASCADE,
+                        CONSTRAINT [FK_DoctorSpecializations_Specializations_SpecializationId]
+                            FOREIGN KEY ([SpecializationId]) REFERENCES [Specializations] ([Id]) ON DELETE NO ACTION
+                    );
+                    CREATE INDEX [IX_DoctorSpecializations_SpecializationId]
+                        ON [DoctorSpecializations] ([SpecializationId]);
+                END
             ");
 
-            // 3. Drop the old FK and column
-            migrationBuilder.DropForeignKey(
-                name: "FK_DoctorProfiles_Specializations_SpecializationId",
-                table: "DoctorProfiles");
+            // 2. Migrate existing data — only if the source column still exists
+            migrationBuilder.Sql(@"
+                IF EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'DoctorProfiles' AND COLUMN_NAME = 'SpecializationId'
+                )
+                BEGIN
+                    INSERT INTO DoctorSpecializations (DoctorProfileId, SpecializationId)
+                    SELECT dp.BusinessId, dp.SpecializationId
+                    FROM DoctorProfiles dp
+                    WHERE dp.SpecializationId != '00000000-0000-0000-0000-000000000000'
+                      AND EXISTS (SELECT 1 FROM Specializations s WHERE s.Id = dp.SpecializationId)
+                      AND NOT EXISTS (
+                          SELECT 1 FROM DoctorSpecializations ds
+                          WHERE ds.DoctorProfileId = dp.BusinessId AND ds.SpecializationId = dp.SpecializationId
+                      );
+                END
+            ");
 
-            migrationBuilder.DropIndex(
-                name: "IX_DoctorProfiles_SpecializationId",
-                table: "DoctorProfiles");
+            // 3. Drop the old FK and column — only if they still exist
+            migrationBuilder.Sql(@"
+                IF EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'DoctorProfiles' AND COLUMN_NAME = 'SpecializationId'
+                )
+                BEGIN
+                    DECLARE @fkName NVARCHAR(256);
+                    SELECT @fkName = fk.name
+                    FROM sys.foreign_keys fk
+                    INNER JOIN sys.foreign_key_columns fkc ON fk.object_id = fkc.constraint_object_id
+                    INNER JOIN sys.columns c ON fkc.parent_object_id = c.object_id AND fkc.parent_column_id = c.column_id
+                    INNER JOIN sys.tables t ON fk.parent_object_id = t.object_id
+                    WHERE t.name = 'DoctorProfiles' AND c.name = 'SpecializationId';
 
-            migrationBuilder.DropColumn(
-                name: "SpecializationId",
-                table: "DoctorProfiles");
+                    IF @fkName IS NOT NULL
+                        EXEC('ALTER TABLE [DoctorProfiles] DROP CONSTRAINT [' + @fkName + ']');
+
+                    ALTER TABLE [DoctorProfiles] DROP COLUMN [SpecializationId];
+                END
+            ");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Restore the old column
-            migrationBuilder.AddColumn<Guid>(
-                name: "SpecializationId",
-                table: "DoctorProfiles",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
-
-            // Restore data: take the first specialization from the join table
+            // Restore SpecializationId column
             migrationBuilder.Sql(@"
-                UPDATE dp
-                SET dp.SpecializationId = (
-                    SELECT TOP 1 ds.SpecializationId
-                    FROM DoctorSpecializations ds
-                    WHERE ds.DoctorProfileId = dp.BusinessId
+                IF NOT EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'DoctorProfiles' AND COLUMN_NAME = 'SpecializationId'
                 )
-                FROM DoctorProfiles dp
-                WHERE EXISTS (
-                    SELECT 1 FROM DoctorSpecializations ds WHERE ds.DoctorProfileId = dp.BusinessId
-                )
+                BEGIN
+                    ALTER TABLE [DoctorProfiles] ADD [SpecializationId] uniqueidentifier NOT NULL
+                        CONSTRAINT [DF_DoctorProfiles_SpecializationId] DEFAULT '00000000-0000-0000-0000-000000000000';
+
+                    -- Restore data from join table (first specialization per doctor)
+                    UPDATE dp
+                    SET dp.SpecializationId = (
+                        SELECT TOP 1 ds.SpecializationId
+                        FROM DoctorSpecializations ds
+                        WHERE ds.DoctorProfileId = dp.BusinessId
+                    )
+                    FROM DoctorProfiles dp
+                    WHERE EXISTS (
+                        SELECT 1 FROM DoctorSpecializations ds WHERE ds.DoctorProfileId = dp.BusinessId
+                    );
+
+                    ALTER TABLE [DoctorProfiles] ADD CONSTRAINT [FK_DoctorProfiles_Specializations_SpecializationId]
+                        FOREIGN KEY ([SpecializationId]) REFERENCES [Specializations] ([Id]) ON DELETE NO ACTION;
+                END
             ");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DoctorProfiles_SpecializationId",
-                table: "DoctorProfiles",
-                column: "SpecializationId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_DoctorProfiles_Specializations_SpecializationId",
-                table: "DoctorProfiles",
-                column: "SpecializationId",
-                principalTable: "Specializations",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.DropTable(name: "DoctorSpecializations");
         }
