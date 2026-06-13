@@ -30,12 +30,10 @@ public class GetDoctorsHandler(AppDbContext db)
             b.Id,
             b.Name,
             b.ProfileImageUrl,
-            SpecializationNames = b.DoctorProfile!.DoctorSpecializations
-                .Select(ds => ds.Specialization.Name),
             GovernorateName = b.City.Governorate.Name,
             AvgRating       = b.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
-            b.DoctorProfile.Gender,
-            b.DoctorProfile.VisitPrice,
+            b.DoctorProfile!.Gender,
+            b.DoctorProfile!.VisitPrice,
             CreatedBy = b.CreatedByUser != null ? b.CreatedByUser.FullName : null,
         });
 
@@ -50,9 +48,21 @@ public class GetDoctorsHandler(AppDbContext db)
 
         var raw = await projected.ToPaginatedAsync(bq.Page, bq.PageSize, ct);
 
+        // Load specializations for this page of doctors in one query
+        var doctorIds = raw.Items.Select(r => r.Id).ToList();
+        var specializationsByDoctor = await db.DoctorSpecializations
+            .AsNoTracking()
+            .Where(ds => doctorIds.Contains(ds.DoctorProfileId))
+            .Select(ds => new { ds.DoctorProfileId, ds.Specialization.Name })
+            .ToListAsync(ct);
+
+        var specMap = specializationsByDoctor
+            .GroupBy(x => x.DoctorProfileId)
+            .ToDictionary(g => g.Key, g => string.Join("، ", g.Select(x => x.Name)));
+
         var items = raw.Items.Select(r => new DoctorListResponse(
             r.Id, r.Name, r.ProfileImageUrl,
-            string.Join("، ", r.SpecializationNames),
+            specMap.TryGetValue(r.Id, out var spec) ? spec : "",
             r.GovernorateName,
             Math.Round(r.AvgRating, 1),
             (int)r.Gender, r.CreatedBy, r.VisitPrice

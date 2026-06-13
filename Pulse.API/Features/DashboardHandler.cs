@@ -38,8 +38,6 @@ public class DashboardHandler(AppDbContext db) : IRequestHandler<DashboardQuery,
             .Select(b => new
             {
                 b.Id, b.Name, b.ProfileImageUrl,
-                SpecializationNames = b.DoctorProfile!.DoctorSpecializations
-                    .Select(ds => ds.Specialization.Name),
                 Governorate  = b.City.Governorate.Name,
                 AvgRating    = b.Testimonials.Average(t => (double)t.Rating),
                 TotalRatings = b.Testimonials.Count,
@@ -59,13 +57,24 @@ public class DashboardHandler(AppDbContext db) : IRequestHandler<DashboardQuery,
             .Select(b => new
             {
                 b.Id, b.Name, b.ProfileImageUrl,
-                SpecializationNames = b.DoctorProfile!.DoctorSpecializations
-                    .Select(ds => ds.Specialization.Name),
                 Governorate = b.City.Governorate.Name,
-                b.DoctorProfile.Gender,
+                b.DoctorProfile!.Gender,
                 VisitPrice  = b.DoctorProfile!.VisitPrice,
             })
             .ToListAsync(ct);
+
+        // Load specializations for both sets in one query
+        var dashboardDoctorIds = topDoctors.Select(d => d.Id)
+            .Concat(recentDoctors.Select(d => d.Id))
+            .Distinct().ToList();
+
+        var dashboardSpecMap = (await db.DoctorSpecializations
+            .AsNoTracking()
+            .Where(ds => dashboardDoctorIds.Contains(ds.DoctorProfileId))
+            .Select(ds => new { ds.DoctorProfileId, ds.Specialization.Name })
+            .ToListAsync(ct))
+            .GroupBy(x => x.DoctorProfileId)
+            .ToDictionary(g => g.Key, g => string.Join("، ", g.Select(x => x.Name)));
 
         // ── Specialization distribution (top 8) ───────────────────────────────
         var specializationStats = await db.DoctorSpecializations
@@ -92,13 +101,15 @@ public class DashboardHandler(AppDbContext db) : IRequestHandler<DashboardQuery,
 
             topDoctors.Select(d => new TopDoctorDto(
                 d.Id, d.Name, d.ProfileImageUrl,
-                string.Join("، ", d.SpecializationNames), d.Governorate,
+                dashboardSpecMap.TryGetValue(d.Id, out var ts) ? ts : "",
+                d.Governorate,
                 Math.Round(d.AvgRating, 1), d.TotalRatings, d.VisitPrice
             )).ToList(),
 
             recentDoctors.Select(d => new RecentDoctorDto(
                 d.Id, d.Name, d.ProfileImageUrl,
-                string.Join("، ", d.SpecializationNames), d.Governorate,
+                dashboardSpecMap.TryGetValue(d.Id, out var rs) ? rs : "",
+                d.Governorate,
                 d.VisitPrice, (int)d.Gender
             )).ToList(),
 

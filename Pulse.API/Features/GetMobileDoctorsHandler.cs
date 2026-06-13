@@ -34,8 +34,6 @@ public class GetMobileDoctorsHandler(AppDbContext db)
             b.Id,
             b.Name,
             b.ProfileImageUrl,
-            SpecializationNames = b.DoctorProfile!.DoctorSpecializations
-                .Select(ds => ds.Specialization.Name),
             GovernorateName    = b.City.Governorate.Name,
             AvgRating          = b.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
             TotalRatings       = b.Testimonials.Count,
@@ -61,6 +59,18 @@ public class GetMobileDoctorsHandler(AppDbContext db)
 
         var raw = await projected.ToPaginatedAsync(bq.Page, bq.PageSize, ct);
 
+        // Load specializations for this page in one query
+        var doctorIds = raw.Items.Select(r => r.Id).ToList();
+        var specsByDoctor = await db.DoctorSpecializations
+            .AsNoTracking()
+            .Where(ds => doctorIds.Contains(ds.DoctorProfileId))
+            .Select(ds => new { ds.DoctorProfileId, ds.Specialization.Name })
+            .ToListAsync(ct);
+
+        var specMap = specsByDoctor
+            .GroupBy(x => x.DoctorProfileId)
+            .ToDictionary(g => g.Key, g => string.Join("، ", g.Select(x => x.Name)));
+
         var items = raw.Items.Select(r =>
         {
             var isOpen = r.NextWorkingDay is not null
@@ -75,7 +85,9 @@ public class GetMobileDoctorsHandler(AppDbContext db)
                 r.NextWorkingDay is not null ? (int)r.NextWorkingDay.Day : 0,
                 r.NextWorkingDay?.StartTime.ToString("HH:mm"),
                 r.NextWorkingDay?.EndTime.ToString("HH:mm"),
-                isOpen, string.Join("، ", r.SpecializationNames), r.VisitPrice
+                isOpen,
+                specMap.TryGetValue(r.Id, out var spec) ? spec : "",
+                r.VisitPrice
             );
         }).ToList();
 

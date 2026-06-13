@@ -22,10 +22,8 @@ public class GetDoctorDetailsHandler(AppDbContext db)
                 GovernorateId   = x.City.Governorate.Id,
                 CityName        = x.City.Name,
                 GovernorateName = x.City.Governorate.Name,
-                Specializations = x.DoctorProfile!.DoctorSpecializations
-                    .Select(ds => new { ds.SpecializationId, ds.Specialization.Name }),
-                x.DoctorProfile.Gender,
-                x.DoctorProfile.VisitPrice,
+                x.DoctorProfile!.Gender,
+                x.DoctorProfile!.VisitPrice,
                 AvgRating    = x.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
                 TotalRatings = x.Testimonials.Count,
                 WorkingDays  = x.WorkingDays.Select(w => new { w.Day, w.StartTime, w.EndTime }).ToList(),
@@ -47,6 +45,14 @@ public class GetDoctorDetailsHandler(AppDbContext db)
             .FirstOrDefaultAsync(ct);
 
         if (b is null) return null;
+
+        // Load specializations separately — sub-collection selects inside EF projections
+        // are not reliably translatable to SQL.
+        var specializations = await db.DoctorSpecializations
+            .AsNoTracking()
+            .Where(ds => ds.DoctorProfileId == b.Id)
+            .Select(ds => new { ds.SpecializationId, ds.Specialization.Name })
+            .ToListAsync(ct);
 
         var today = DateTime.UtcNow.DayOfWeek;
         var now   = TimeOnly.FromDateTime(DateTime.UtcNow);
@@ -72,8 +78,8 @@ public class GetDoctorDetailsHandler(AppDbContext db)
             }).ToList(),
             b.Testimonials.Select(t => new TestimonialDto(t.Id, t.FullName, t.ImageUrl, t.Rating, t.Text, t.CreatedAt)).ToList(),
             b.Services.Select(s => new ServiceDto(s)).ToList(),
-            b.Specializations.Select(s => s.SpecializationId).ToList(),
-            b.Specializations.Select(s => s.Name).ToList()
+            specializations.Select(s => s.SpecializationId).ToList(),
+            specializations.Select(s => s.Name).ToList()
         );
     }
 }

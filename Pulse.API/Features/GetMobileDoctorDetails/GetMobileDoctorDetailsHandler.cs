@@ -22,10 +22,8 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
             {
                 x.Id, x.Name, x.ProfileImageUrl, x.CoverImageUrl,
                 x.Description, x.Address, x.Latitude, x.Longitude,
-                CityName           = x.City.Name,
-                GovernorateName    = x.City.Governorate.Name,
-                Specializations = x.DoctorProfile!.DoctorSpecializations
-                    .Select(ds => ds.Specialization.Name),
+                CityName        = x.City.Name,
+                GovernorateName = x.City.Governorate.Name,
                 AvgRating       = x.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
                 TotalRatings    = x.Testimonials.Count,
                 IsFavorite      = userId != null && db.UserFavorite.Any(f => f.UserId == userId.Value && f.BusinessId == x.Id),
@@ -50,6 +48,13 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
             .FirstOrDefaultAsync(ct);
 
         if (b is null) return null;
+
+        // Load specializations separately
+        var specNames = await db.DoctorSpecializations
+            .AsNoTracking()
+            .Where(ds => ds.DoctorProfileId == b.Id)
+            .Select(ds => ds.Specialization.Name)
+            .ToListAsync(ct);
 
         string? Abs(string? path) => UrlHelper.ToAbsolute(path, request.BaseUrl);
         var today = DateTime.UtcNow.DayOfWeek;
@@ -77,7 +82,7 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
             }).ToList(),
             b.Testimonials.Select(t => new TestimonialDto(t.Id, t.FullName, Abs(t.ImageUrl), t.Rating, t.Text, t.CreatedAt)).ToList(),
             b.Services.Select(s => new ServiceDto(s)).ToList(),
-            string.Join("، ", b.Specializations)
+            string.Join("، ", specNames)
         );
     }
 }
