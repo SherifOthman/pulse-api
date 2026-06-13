@@ -32,9 +32,13 @@ public class RefreshTokenEndpoints : IEndpoint
                 LoginEndpoints.AppendRefreshTokenCookie(context, result.RefreshToken);
                 return Results.Ok(new { result.AccessToken, result.RefreshToken });
             }
-            catch
+            catch (Exception ex) when (ex.Message is "Invalid refresh token" or "Refresh token is not active")
             {
                 return Results.Unauthorized();
+            }
+            catch
+            {
+                return Results.Problem("An unexpected error occurred.", statusCode: 500);
             }
         });
 

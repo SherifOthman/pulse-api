@@ -26,17 +26,38 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, AuthResp
         _userManager = userManager;
     }
 
-
     public async Task<AuthResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var refreshTokenHash = TokenHasher.Hash(request.RefreshToken);
 
-        var storedToken = await _db.RefreshTokens.
-            Include(x => x.User)
+        var storedToken = await _db.RefreshTokens
+            .Include(x => x.User)
             .FirstOrDefaultAsync(x => x.TokenHash == refreshTokenHash, cancellationToken);
 
-        if(storedToken == null) 
+        if (storedToken == null)
             throw new Exception("Invalid refresh token");
+
+        // Token was already rotated — this happens when the backend rotated the token
+        // successfully but the response never reached the client (network error, etc.),
+        // so the client still holds the old token. Follow the replacement chain once
+        // and return the already-issued successor token as a new rotation.
+        if (storedToken.RevokedAt != null && storedToken.ReplacedByTokenHash != null)
+        {
+            var successor = await _db.RefreshTokens
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.TokenHash == storedToken.ReplacedByTokenHash, cancellationToken);
+
+            if (successor != null && successor.IsActive)
+            {
+                // Treat this as a fresh use of the successor token — rotate it now.
+                storedToken = successor;
+            }
+            else
+            {
+                // Successor is also gone — potential token theft, reject.
+                throw new Exception("Refresh token is not active");
+            }
+        }
 
         if (!storedToken.IsActive)
             throw new Exception("Refresh token is not active");
@@ -44,7 +65,7 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, AuthResp
         var user = storedToken.User;
 
         storedToken.RevokedAt = DateTime.UtcNow;
-        storedToken.RevokedByIp = request.IpAddress!;
+        storedToken.RevokedByIp = request.IpAddress ?? "unknown";
 
         var roles = await _userManager.GetRolesAsync(user);
         var newAccessToken = _jwt.Generate(user, roles);
@@ -63,7 +84,7 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, AuthResp
         _db.RefreshTokens.Add(newRefreshToken);
         storedToken.ReplacedByTokenHash = newHash;
 
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(cancellationToken);
 
         return new AuthResponse(newAccessToken, newRawRefreshToken);
     }
