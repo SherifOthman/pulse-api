@@ -413,17 +413,27 @@ namespace Pulse.API.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("SpecializationId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<decimal?>("VisitPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("BusinessId");
 
+                    b.ToTable("DoctorProfiles", (string)null);
+                });
+
+            modelBuilder.Entity("Pulse.API.Domain.Entities.DoctorSpecialization", b =>
+                {
+                    b.Property<Guid>("DoctorProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SpecializationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("DoctorProfileId", "SpecializationId");
+
                     b.HasIndex("SpecializationId");
 
-                    b.ToTable("DoctorProfiles", (string)null);
+                    b.ToTable("DoctorSpecializations", (string)null);
                 });
 
             modelBuilder.Entity("Pulse.API.Domain.Entities.Governorate", b =>
@@ -847,13 +857,26 @@ namespace Pulse.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Business");
+
+                    b.Navigation("DoctorSpecializations");
+                });
+
+            modelBuilder.Entity("Pulse.API.Domain.Entities.DoctorSpecialization", b =>
+                {
+                    b.HasOne("Pulse.API.Domain.Entities.DoctorProfile", "DoctorProfile")
+                        .WithMany("DoctorSpecializations")
+                        .HasForeignKey("DoctorProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Pulse.API.Domain.Entities.Specialization", "Specialization")
-                        .WithMany("Doctors")
+                        .WithMany("DoctorSpecializations")
                         .HasForeignKey("SpecializationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Business");
+                    b.Navigation("DoctorProfile");
 
                     b.Navigation("Specialization");
                 });
@@ -1028,7 +1051,7 @@ namespace Pulse.API.Migrations
 
             modelBuilder.Entity("Pulse.API.Domain.Entities.Specialization", b =>
                 {
-                    b.Navigation("Doctors");
+                    b.Navigation("DoctorSpecializations");
                 });
 #pragma warning restore 612, 618
         }

@@ -19,11 +19,12 @@ public class GetDoctorDetailsHandler(AppDbContext db)
                 x.Id, x.Name, x.ProfileImageUrl, x.CoverImageUrl,
                 x.Description, x.Address, x.Latitude, x.Longitude,
                 x.CityId,
-                GovernorateId      = x.City.Governorate.Id,
-                CityName           = x.City.Name,
-                GovernorateName    = x.City.Governorate.Name,
-                SpecializationId   = x.DoctorProfile!.SpecializationId,
-                SpecializationName = x.DoctorProfile!.Specialization.Name,
+                GovernorateId   = x.City.Governorate.Id,
+                CityName        = x.City.Name,
+                GovernorateName = x.City.Governorate.Name,
+                Specializations = x.DoctorProfile!.DoctorSpecializations
+                    .Select(ds => new { ds.SpecializationId, ds.Specialization.Name })
+                    .ToList(),
                 x.DoctorProfile.Gender,
                 x.DoctorProfile.VisitPrice,
                 AvgRating    = x.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
@@ -72,7 +73,8 @@ public class GetDoctorDetailsHandler(AppDbContext db)
             }).ToList(),
             b.Testimonials.Select(t => new TestimonialDto(t.Id, t.FullName, t.ImageUrl, t.Rating, t.Text, t.CreatedAt)).ToList(),
             b.Services.Select(s => new ServiceDto(s)).ToList(),
-            b.SpecializationId, b.SpecializationName
+            b.Specializations.Select(s => s.SpecializationId).ToList(),
+            b.Specializations.Select(s => s.Name).ToList()
         );
     }
 }

@@ -15,6 +15,7 @@ public class UpdateDoctorHandler(AppDbContext db)
     {
         var business = await db.Businesses
             .Include(b => b.DoctorProfile)
+                .ThenInclude(dp => dp!.DoctorSpecializations)
             .Include(b => b.WorkingDays)
             .Include(b => b.PhoneNumbers)
             .FirstOrDefaultAsync(b => b.Id == request.Id && b.Type == BusinessType.Doctor, ct);
@@ -49,11 +50,25 @@ public class UpdateDoctorHandler(AppDbContext db)
 
         if (business.DoctorProfile is not null)
         {
-            if (request.SpecializationId.HasValue)
+            if (request.SpecializationIds is not null)
             {
-                if (!await db.Set<Specialization>().AnyAsync(s => s.Id == request.SpecializationId.Value, ct))
-                    throw new NotFoundException("Specialization not found");
-                business.DoctorProfile.SpecializationId = request.SpecializationId.Value;
+                var specIds = request.SpecializationIds;
+                if (specIds.Count > 0)
+                {
+                    var validCount = await db.Set<Specialization>()
+                        .CountAsync(s => specIds.Contains(s.Id), ct);
+                    if (validCount != specIds.Count)
+                        throw new NotFoundException("One or more specializations not found");
+                }
+
+                // Replace all specializations
+                db.Set<DoctorSpecialization>().RemoveRange(business.DoctorProfile.DoctorSpecializations);
+                foreach (var id in specIds)
+                    db.Set<DoctorSpecialization>().Add(new DoctorSpecialization
+                    {
+                        DoctorProfileId  = business.DoctorProfile.BusinessId,
+                        SpecializationId = id,
+                    });
             }
 
             if (request.Gender.HasValue) business.DoctorProfile.Gender = request.Gender.Value;
@@ -66,9 +81,6 @@ public class UpdateDoctorHandler(AppDbContext db)
 
         if (request.WorkingDays is not null)
         {
-            // Delete existing rows and insert fresh ones.
-            // We add new entities directly to the DbSet (not via the nav collection)
-            // to avoid EF re-evaluating the relationship when the nav collection changes.
             db.Set<WorkingDay>().RemoveRange(business.WorkingDays);
             var newDays = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays);
             foreach (var day in newDays)

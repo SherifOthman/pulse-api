@@ -22,19 +22,22 @@ public class GetDoctorsHandler(AppDbContext db)
             query = query.Where(b => b.DoctorProfile!.Gender == request.Gender.Value);
 
         if (request.SpecializationId.HasValue)
-            query = query.Where(b => b.DoctorProfile!.SpecializationId == request.SpecializationId.Value);
+            query = query.Where(b => b.DoctorProfile!.DoctorSpecializations
+                .Any(ds => ds.SpecializationId == request.SpecializationId.Value));
 
         var projected = query.Select(b => new
         {
             b.Id,
             b.Name,
             b.ProfileImageUrl,
-            SpecializationName = b.DoctorProfile!.Specialization.Name,
-            GovernorateName    = b.City.Governorate.Name,
-            AvgRating          = b.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
+            SpecializationNames = b.DoctorProfile!.DoctorSpecializations
+                .Select(ds => ds.Specialization.Name)
+                .ToList(),
+            GovernorateName = b.City.Governorate.Name,
+            AvgRating       = b.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
             b.DoctorProfile.Gender,
             b.DoctorProfile.VisitPrice,
-            CreatedBy          = b.CreatedByUser != null ? b.CreatedByUser.FullName : null,
+            CreatedBy = b.CreatedByUser != null ? b.CreatedByUser.FullName : null,
         });
 
         var desc = bq.SortDirection?.ToLower() == "desc";
@@ -50,7 +53,8 @@ public class GetDoctorsHandler(AppDbContext db)
 
         var items = raw.Items.Select(r => new DoctorListResponse(
             r.Id, r.Name, r.ProfileImageUrl,
-            r.SpecializationName, r.GovernorateName,
+            string.Join("، ", r.SpecializationNames),
+            r.GovernorateName,
             Math.Round(r.AvgRating, 1),
             (int)r.Gender, r.CreatedBy, r.VisitPrice
         )).ToList();

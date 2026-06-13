@@ -26,14 +26,17 @@ public class GetMobileDoctorsHandler(AppDbContext db)
             query = query.Where(b => b.DoctorProfile!.Gender == request.Gender.Value);
 
         if (request.SpecializationId.HasValue)
-            query = query.Where(b => b.DoctorProfile!.SpecializationId == request.SpecializationId.Value);
+            query = query.Where(b => b.DoctorProfile!.DoctorSpecializations
+                .Any(ds => ds.SpecializationId == request.SpecializationId.Value));
 
         var projected = query.Select(b => new
         {
             b.Id,
             b.Name,
             b.ProfileImageUrl,
-            SpecializationName = b.DoctorProfile!.Specialization.Name,
+            SpecializationNames = b.DoctorProfile!.DoctorSpecializations
+                .Select(ds => ds.Specialization.Name)
+                .ToList(),
             GovernorateName    = b.City.Governorate.Name,
             AvgRating          = b.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
             TotalRatings       = b.Testimonials.Count,
@@ -73,7 +76,7 @@ public class GetMobileDoctorsHandler(AppDbContext db)
                 r.NextWorkingDay is not null ? (int)r.NextWorkingDay.Day : 0,
                 r.NextWorkingDay?.StartTime.ToString("HH:mm"),
                 r.NextWorkingDay?.EndTime.ToString("HH:mm"),
-                isOpen, r.SpecializationName, r.VisitPrice
+                isOpen, string.Join("، ", r.SpecializationNames), r.VisitPrice
             );
         }).ToList();
 

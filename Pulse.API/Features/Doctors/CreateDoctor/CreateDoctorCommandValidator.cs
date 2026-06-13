@@ -15,9 +15,9 @@ public class CreateDoctorCommandValidator : AbstractValidator<CreateDoctorComman
         RuleFor(x => x.CityId).NotEmpty()
             .MustAsync(async (id, ct) => await db.Set<City>().AnyAsync(c => c.Id == id, ct))
             .WithMessage("City does not exist");
-        RuleFor(x => x.SpecializationId).NotEmpty()
-            .MustAsync(async (id, ct) => await db.Set<Specialization>().AnyAsync(s => s.Id == id, ct))
-            .WithMessage("Specialization does not exist");
+        RuleFor(x => x.SpecializationIds)
+            .NotEmpty().WithMessage("At least one specialization is required")
+            .When(x => x.SpecializationIds is not null);
         RuleFor(x => x.Gender).NotNull().IsInEnum();
         RuleFor(x => x.Description).MaximumLength(500).When(x => x.Description is not null);
         RuleFor(x => x.Address).MaximumLength(500).When(x => x.Address is not null);

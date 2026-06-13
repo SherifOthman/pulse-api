@@ -38,7 +38,8 @@ public class DashboardHandler(AppDbContext db) : IRequestHandler<DashboardQuery,
             .Select(b => new
             {
                 b.Id, b.Name, b.ProfileImageUrl,
-                Specialization = b.DoctorProfile!.Specialization.Name,
+                Specialization = string.Join("، ", b.DoctorProfile!.DoctorSpecializations
+                    .Select(ds => ds.Specialization.Name)),
                 Governorate    = b.City.Governorate.Name,
                 AvgRating      = b.Testimonials.Average(t => (double)t.Rating),
                 TotalRatings   = b.Testimonials.Count,
@@ -58,7 +59,8 @@ public class DashboardHandler(AppDbContext db) : IRequestHandler<DashboardQuery,
             .Select(b => new
             {
                 b.Id, b.Name, b.ProfileImageUrl,
-                Specialization = b.DoctorProfile!.Specialization.Name,
+                Specialization = string.Join("، ", b.DoctorProfile!.DoctorSpecializations
+                    .Select(ds => ds.Specialization.Name)),
                 Governorate    = b.City.Governorate.Name,
                 b.DoctorProfile.Gender,
                 VisitPrice     = b.DoctorProfile!.VisitPrice,
@@ -66,10 +68,9 @@ public class DashboardHandler(AppDbContext db) : IRequestHandler<DashboardQuery,
             .ToListAsync(ct);
 
         // ── Specialization distribution (top 8) ───────────────────────────────
-        var specializationStats = await db.Businesses
+        var specializationStats = await db.DoctorSpecializations
             .AsNoTracking()
-            .Where(b => b.Type == BusinessType.Doctor)
-            .GroupBy(b => b.DoctorProfile!.Specialization.Name)
+            .GroupBy(ds => ds.Specialization.Name)
             .Select(g => new { Name = g.Key, Count = g.Count() })
             .OrderByDescending(x => x.Count)
             .Take(8)

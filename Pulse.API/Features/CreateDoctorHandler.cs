@@ -23,11 +23,27 @@ public class CreateDoctorHandler(AppDbContext db, ICurrentUser currentUser)
         if (!await db.Set<City>().AnyAsync(c => c.Id == request.CityId.Value, ct))
             throw new NotFoundException("City not found");
 
-        if (request.SpecializationId.HasValue
-            && !await db.Set<Specialization>().AnyAsync(s => s.Id == request.SpecializationId.Value, ct))
-            throw new NotFoundException("Specialization not found");
+        var specIds = request.SpecializationIds ?? new List<Guid>();
+
+        if (specIds.Count > 0)
+        {
+            var validCount = await db.Set<Specialization>()
+                .CountAsync(s => specIds.Contains(s.Id), ct);
+            if (validCount != specIds.Count)
+                throw new NotFoundException("One or more specializations not found");
+        }
 
         var workingDays = DoctorMappingHelpers.MapWorkingDays(request.WorkingDays);
+
+        var doctorProfile = new DoctorProfile
+        {
+            Gender     = request.Gender ?? Gender.Male,
+            VisitPrice = request.VisitPrice,
+            DoctorSpecializations = specIds.Select(id => new DoctorSpecialization
+            {
+                SpecializationId = id
+            }).ToList(),
+        };
 
         var business = new Business
         {
@@ -41,14 +57,9 @@ public class CreateDoctorHandler(AppDbContext db, ICurrentUser currentUser)
             Latitude        = request.Latitude,
             Longitude       = request.Longitude,
             CreatedByUserId = currentUser.Id,
-            DoctorProfile = new DoctorProfile
-            {
-                SpecializationId = request.SpecializationId ?? Guid.Empty,
-                Gender           = request.Gender ?? Gender.Male,
-                VisitPrice       = request.VisitPrice,
-            },
-            WorkingDays  = workingDays,
-            PhoneNumbers = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers),
+            DoctorProfile   = doctorProfile,
+            WorkingDays     = workingDays,
+            PhoneNumbers    = DoctorMappingHelpers.MapPhoneNumbers(request.PhoneNumbers),
         };
 
         db.Businesses.Add(business);

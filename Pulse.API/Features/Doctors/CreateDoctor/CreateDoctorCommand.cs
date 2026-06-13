@@ -11,7 +11,7 @@ public record CreateDoctorCommand(
     string? Description,
     string? ProfileImageUrl,
     string? CoverImageUrl,
-    Guid? SpecializationId,
+    List<Guid>? SpecializationIds,
     Gender? Gender,
     decimal? VisitPrice,
     double? Latitude,

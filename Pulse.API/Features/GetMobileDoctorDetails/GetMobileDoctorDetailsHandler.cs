@@ -24,7 +24,9 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
                 x.Description, x.Address, x.Latitude, x.Longitude,
                 CityName           = x.City.Name,
                 GovernorateName    = x.City.Governorate.Name,
-                SpecializationName = x.DoctorProfile!.Specialization.Name,
+                Specializations = x.DoctorProfile!.DoctorSpecializations
+                    .Select(ds => ds.Specialization.Name)
+                    .ToList(),
                 AvgRating       = x.Testimonials.Select(t => (double)t.Rating).DefaultIfEmpty().Average(),
                 TotalRatings    = x.Testimonials.Count,
                 IsFavorite      = userId != null && db.UserFavorite.Any(f => f.UserId == userId.Value && f.BusinessId == x.Id),
@@ -76,7 +78,7 @@ public class GetMobileDoctorDetailsHandler(AppDbContext db)
             }).ToList(),
             b.Testimonials.Select(t => new TestimonialDto(t.Id, t.FullName, Abs(t.ImageUrl), t.Rating, t.Text, t.CreatedAt)).ToList(),
             b.Services.Select(s => new ServiceDto(s)).ToList(),
-            b.SpecializationName
+            string.Join("، ", b.Specializations)
         );
     }
 }
